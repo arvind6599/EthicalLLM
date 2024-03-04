@@ -1,0 +1,11 @@
+
+# model files
+*.pt
+
+# log files
+*.log
+
+# ignore the wandb file runs
+wandb/
+
+# 
