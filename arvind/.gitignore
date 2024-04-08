@@ -7,6 +7,8 @@
 
 # ignore the wandb file runs
 wandb/
+models/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
