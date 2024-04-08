@@ -8,6 +8,7 @@
 # ignore the wandb file runs
 wandb/
 models/
+roberta-base-lora-text-classification/
 
 
 # Byte-compiled / optimized / DLL files
