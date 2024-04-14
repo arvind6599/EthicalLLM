@@ -1,4 +1,5 @@
 from utils import retrieve_and_parse_response
+import pandas as pd
 
 def test_parse():
     # tests with the parse function

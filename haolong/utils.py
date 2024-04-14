@@ -1,4 +1,6 @@
 import json, re, os
+from tqdm import tqdm
+from datasets import load_dataset
 
 def fix_common_json_errors(json_str):
     """Attempts to fix common JSON formatting errors."""
@@ -12,7 +14,6 @@ def retrieve_and_parse_response(data: str):
     try:
         end_index = data.rindex('}') + 1 
         clean_data = data[start_index:end_index]
-        
         # Attempt to parse the cleaned data
         try:
             json_data = json.loads(clean_data)
@@ -37,25 +38,29 @@ def retrieve_and_parse_response(data: str):
             raise ValueError("No JSON parsable data found in the model response after all attempts")
     except ValueError:
         # couldn't find the } in the string, probably because of too long response
+        
+        # find the pattern "choice": "A" or "choice": "B"
         match = re.search(r'"choice":\s*"([AB])"', data)
         if match:
             choice_str = match.group(1)
             return {"choice": choice_str}
         else:
+            # nothing as "choice": "X", we just find the first "A" or "B" as it's usually what the
+            # constitution AI perfers.
             match_simple = re.search(r'\s*"([AB])"', data)
             if match_simple:
                 choice_str = match_simple.group(1)
                 return {"choice": choice_str}
             else:
-                raise ValueError("Too long response, couldn't find anything, see input above")
+                raise ValueError("Too long response, couldn't find anything")
             
             
 def load_harmful_data():
     if os.path.exists('/scratch/students/haolli/harmful_prompts_anthropic_hh.json'):
         # load the data directly if exists
         with open('/scratch/students/haolli/harmful_prompts_anthropic_hh.json', 'r') as file:
-            harmless_prompts = json.load(file)
-        return harmless_prompts
+            harmful_prompts = json.load(file)
+        return harmful_prompts
     else:
         dataset = load_dataset("Anthropic/hh-rlhf", data_dir="harmless-base", cache_dir="/scratch/students/haolli")
         # Parsing & saving the harmful prompts
@@ -72,3 +77,15 @@ def load_harmful_data():
         with open('/scratch/students/haolli/harmful_prompts_anthropic_hh.json', 'w') as file:
             json.dump(harmful_prompts, file)
         return harmful_prompts
+    
+def reconstruct_conversation(harmful_prompt: str, model_response: str):
+    return f"""
+
+Human: {harmful_prompt}
+
+Assistant: {model_response}
+"""
+
+def add_rows_to_df(df, rows):
+    for row in rows:
+        df.loc[len(df)] = row
