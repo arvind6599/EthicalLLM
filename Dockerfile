@@ -1,52 +1,52 @@
 # inspired from: https://gist.github.com/mpagli/d9550430b6beead3c1747f6cfa7b4ab7
 
 FROM ic-registry.epfl.ch/dlab/wendler/conda:prod
-
+USER root
 
 
 # install some necessary tools.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        build-essential \
-        ca-certificates \
-        pkg-config \
-        software-properties-common
-RUN apt-get install -y \
-        inkscape \
-        texlive-latex-extra \
-        dvipng \
-        texlive-full \
-        jed \
-        libsm6 \
-        libxext-dev \
-        libxrender1 \
-        lmodern \
-        libcurl3-dev \
-        libfreetype6-dev \
-        libzmq3-dev \
-        libcupti-dev \
-        pkg-config \
-        libjpeg-dev \
-        libpng-dev \
-        zlib1g-dev \
-        locales
-RUN apt-get install -y \
-        rsync \
-        cmake \
-        g++ \
-        swig \
-        vim \
-        git \
-        curl \
-        wget \
-        unzip \
-        zsh \
-        git \
-        screen \
-        tmux
-RUN apt-get install -y openssh-server
-# install good vim.
-RUN curl http://j.mp/spf13-vim3 -L -o - | sh
+# RUN apt-get update \
+#     && apt-get install -y --no-install-recommends \
+#         build-essential \
+#         ca-certificates \
+#         pkg-config \
+#         software-properties-common
+# RUN apt-get install -y \
+#         inkscape \
+#         texlive-latex-extra \
+#         dvipng \
+#         texlive-full \
+#         jed \
+#         libsm6 \
+#         libxext-dev \
+#         libxrender1 \
+#         lmodern \
+#         libcurl3-dev \
+#         libfreetype6-dev \
+#         libzmq3-dev \
+#         libcupti-dev \
+#         pkg-config \
+#         libjpeg-dev \
+#         libpng-dev \
+#         zlib1g-dev \
+#         locales
+# RUN apt-get install -y \
+#         rsync \
+#         cmake \
+#         g++ \
+#         swig \
+#         vim \
+#         git \
+#         curl \
+#         wget \
+#         unzip \
+#         zsh \
+#         git \
+#         screen \
+#         tmux
+# RUN apt-get install -y openssh-server
+# # install good vim.
+# RUN curl http://j.mp/spf13-vim3 -L -o - | sh
 
 # configure environments.
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && locale-gen
