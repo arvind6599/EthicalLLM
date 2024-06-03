@@ -237,14 +237,14 @@ if __name__ == "__main__":
     start_time = cur_time
     
     # ask twice
-    sft_responses_1 = retrieve_pipe_responses(pipe_SL, harmful_prompts, max_new_tokens=128, type_pipe="SFT")
+    sft_responses_1 = retrieve_pipe_responses(pipe_SL, harmful_prompts, max_new_tokens=96, type_pipe="SFT")
     
     ########################################
     print(f"Time elapsed for SFT 1: {time.time() - cur_time}")
     cur_time = time.time()
     ########################################
     
-    sft_responses_2 = retrieve_pipe_responses(pipe_SL, harmful_prompts, max_new_tokens=128, type_pipe="SFT")
+    sft_responses_2 = retrieve_pipe_responses(pipe_SL, harmful_prompts, max_new_tokens=96, type_pipe="SFT")
     
     ########################################
     print(f"Time elapsed for SFT 2: {time.time() - cur_time}")
