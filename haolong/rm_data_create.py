@@ -7,6 +7,7 @@ from typing import List
 from datasets import Dataset
 import pandas as pd
 import random
+import time
 from utils import retrieve_and_parse_response, load_harmful_data, reconstruct_conversation, add_rows_to_df
 
 
@@ -157,48 +158,10 @@ def retrieve_pipe_responses(pipe, prompts, max_new_tokens=32, type_pipe="SFT"):
             }]
             for prompt in prompts
         ]
-
-        # Initialize a list to store the outputs and a tracking list for retries
-        outputs = [None] * len(prompts)
-        retries = [0] * len(prompts)  # Track retries for each prompt
-
-        while None in outputs:
-            # Filter only those messages which need processing
-            current_batch = [
-                messages for messages, output, retry in zip(initial_messages, outputs, retries)
-                if output is None and retry <= 2
-            ]
-
-            if not current_batch:
-                break
-
-            # Process the current batch
-            batch_responses = pipe(current_batch, max_new_tokens=max_new_tokens, do_sample=True)
-            batch_responses = [response[0]['generated_text'][-1] for response in batch_responses]
-
-            # Update messages and outputs
-            for index, (messages, response, retry) in enumerate(zip(initial_messages, batch_responses, retries)):
-                if outputs[index] is not None:
-                    continue  # Skip already processed items
-
-                try:
-                    # Attempt to parse the JSON response
-                    parsed_response = retrieve_and_parse_response(response['content'])
-                    outputs[index] = parsed_response
-                except ValueError:
-                    retries[index] += 1
-                    if retries[index] > 3:
-                        # If retries exceed 3, output an error message or a fallback value
-                        outputs[index] = {"error": "Failed to parse response after several attempts."}
-                    else:
-                        # Update the messages for a retry
-                        messages.append(response)
-                        messages.append({
-                            "role": "user",
-                            "content": "Please respond in JSON format."
-                        })
-
-        responses = outputs
+        
+        batch_responses = pipe(initial_messages, max_new_tokens=max_new_tokens, do_sample=True)
+        batch_responses = [response[0]['generated_text'][-1] for response in batch_responses]
+        responses = batch_responses
 
 
     return responses
@@ -262,31 +225,40 @@ def generate_prompt_to_constitution(virtue: str, harmful_prompt_to_SFT_model: st
 def prepare_new_rows_for_amc_data(harmful_prompts, responses_1, responses_2, virtues, type='action'):
     new_rows_1 = []
     new_rows_2 = []
+    
+    all_prompts = []
+    prompt_to_index_virtue_map = []
+    
+    # generate all prompts for the constitution model
     for index, harmful_prompt in enumerate(harmful_prompts):
         response_1 = responses_1[index][type]
         response_2 = responses_2[index][type]
-
-        new_row_1 = pd.Series({'conversation': reconstruct_conversation(harmful_prompt, response_1), 'scores': 0})
-        new_row_2 = pd.Series({'conversation': reconstruct_conversation(harmful_prompt, response_2), 'scores': 0})
-
         for virtue in virtues:
-            prompt_to_constitution = generate_prompt_to_constitution(virtue, harmful_prompt, [response_1, response_2], type=type)
-            constitution_model_responses = retrieve_pipe_responses(pipe_constitution, [prompt_to_constitution], max_new_tokens=20, type_pipe="Constitution")[0]
-            
-            if 'choice' in constitution_model_responses:
-                if constitution_model_responses['choice'] == 'A':
-                    new_row_1['scores'] += 1
-                elif constitution_model_responses['choice'] == 'B':
-                    new_row_2['scores'] += 1
-            else:
-                response_dict_values = list(constitution_model_responses.values())
-                if 'A' in response_dict_values or 'a' in response_dict_values:
-                    new_row_1['scores'] += 1
-                elif 'B' in response_dict_values or 'b' in response_dict_values:
-                    new_row_2['scores'] += 1
-            
-        new_row_1['scores'] = new_row_1['scores'] / len(virtues)
-        new_row_2['scores'] = new_row_2['scores'] / len(virtues)
+            prompt = generate_prompt_to_constitution(virtue, harmful_prompt, [response_1, response_2], type=type)
+            all_prompts.append(prompt)
+            prompt_to_index_virtue_map.append((index, virtue))
+    
+    # process all prompts in batch
+    constitution_responses = retrieve_pipe_responses(pipe_constitution, all_prompts, max_new_tokens=20, type_pipe="Constitution")
+
+    # initialize scores
+    scores_1 = [0] * len(harmful_prompts)
+    scores_2 = [0] * len(harmful_prompts)
+
+    # handle the responses from the constitution model
+    for response, (index, virtue) in zip(constitution_responses, prompt_to_index_virtue_map):
+        if 'choice' in response:
+            if response['choice'] == 'A':
+                scores_1[index] += 1
+            elif response['choice'] == 'B':
+                scores_2[index] += 1
+
+    # convert the scores to the final scores
+    for index, harmful_prompt in enumerate(harmful_prompts):
+        response_1 = responses_1[index][type]
+        response_2 = responses_2[index][type]
+        new_row_1 = pd.Series({'conversation': reconstruct_conversation(harmful_prompt, response_1), 'scores': scores_1[index] / len(virtues)})
+        new_row_2 = pd.Series({'conversation': reconstruct_conversation(harmful_prompt, response_2), 'scores': scores_2[index] / len(virtues)})
         new_rows_1.append(new_row_1)
         new_rows_2.append(new_row_2)
 
@@ -318,6 +290,8 @@ def create_hf_dataset(df):
     # Convert the grouped data into a HuggingFace dataset
     hf_dataset = Dataset.from_dict(grouped_data)
     return hf_dataset
+
+
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -394,14 +368,51 @@ if __name__ == "__main__":
     #     add_rows_to_df(motivation_data, [new_motivation_data_row_1, new_motivation_data_row_2])
     #     add_rows_to_df(consequences_data, [new_consequence_data_row_1, new_consequence_data_row_2])
     
+    start_time = time.time()
     
     # ask twice
     sft_responses_1 = retrieve_pipe_responses(pipe_SL, harmful_prompts, max_new_tokens=32, type_pipe="SFT")
+    
+    ########################################
+    cur_time = time.time()
+    print(f"Time elapsed for SFT 1: {cur_time - start_time}")
+    ########################################
+    
     sft_responses_2 = retrieve_pipe_responses(pipe_SL, harmful_prompts, max_new_tokens=32, type_pipe="SFT")
+    
+    ########################################
+    cur_time = time.time()
+    print(f"Time elapsed for SFT 2: {time.time() - cur_time}")
+    ########################################
+
 
     action_data_rows_1, action_data_rows_2 = prepare_new_rows_for_amc_data(harmful_prompts, sft_responses_1, sft_responses_2, virtues, type='action')
+    
+    ########################################
+    cur_time = time.time()
+    print(f"Time elapsed for constituion action: {cur_time - start_time}")
+    ########################################
+    
+    
+    
     motivation_data_rows_1, motivation_data_rows_2 = prepare_new_rows_for_amc_data(harmful_prompts, sft_responses_1, sft_responses_2, virtues, type='motivation')
+    
+    ########################################
+    cur_time = time.time()
+    print(f"Time elapsed for constituion motivation: {cur_time - start_time}")
+    ########################################
+    
+    
+    
     consequence_data_rows_1, consequence_data_rows_2 = prepare_new_rows_for_amc_data(harmful_prompts, sft_responses_1, sft_responses_2, virtues, type='consequence')
+
+    ########################################
+    cur_time = time.time()
+    print(f"Time elapsed for constituion consequence: {cur_time - start_time}")
+    ########################################
+
+
+
 
     action_data = mix_rows(action_data_rows_1, action_data_rows_2)
     motivation_data = mix_rows(motivation_data_rows_1, motivation_data_rows_2)
