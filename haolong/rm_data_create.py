@@ -194,8 +194,8 @@ if __name__ == "__main__":
     motivation_data = pd.DataFrame(columns=['conversation', 'scores'])
     consequences_data = pd.DataFrame(columns=['conversation', 'scores'])
 
-    for harmful_prompt in harmful_prompts_exp:
-    # for harmful_prompt in harmful_prompts:
+    for harmful_prompt in tqdm(harmful_prompts_exp, desc="Processing prompts"):
+    # for harmful_prompt in tqdm(harmful_prompts, desc="Processing prompts"):
         SFT_model_response_dict_1 = retrieve_pipe_response(pipe_SL, harmful_prompt, max_new_tokens=32)
         SFT_model_response_dict_2 = retrieve_pipe_response(pipe_SL, harmful_prompt, max_new_tokens=32)
         
@@ -216,9 +216,13 @@ if __name__ == "__main__":
         add_rows_to_df(motivation_data, [new_motivation_data_row_1, new_motivation_data_row_2])
         add_rows_to_df(consequences_data, [new_consequence_data_row_1, new_consequence_data_row_2])
     
+    print("DataFrame DONE, converting to hf dataset")
+    
     hf_action_dataset = create_hf_dataset(action_data)
     hf_motivation_dataset = create_hf_dataset(motivation_data)
     hf_consequences_dataset = create_hf_dataset(consequences_data)
+    
+    print("conversion DONE, pushing to hub")
     
     hf_action_dataset.push_to_hub("Tachi67/rm_data_action")
     hf_motivation_dataset.push_to_hub("Tachi67/rm_data_motivation")
