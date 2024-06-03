@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from datasets import load_dataset
 from torch.utils.data import DataLoader, Dataset
