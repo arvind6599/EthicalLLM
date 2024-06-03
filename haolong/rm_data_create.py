@@ -172,11 +172,11 @@ if __name__ == "__main__":
 
     model_sl = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", quantization_config=quantization_config, device_map="auto")
     model_cons = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", quantization_config=quantization_config, device_map="auto")
+    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
 
-
-    pipe_SL = pipeline("text-generation", model=model_sl, device_map="auto",
+    pipe_SL = pipeline("text-generation", model=model_sl, device_map="auto", tokenizer=tokenizer
                     )
-    pipe_constitution = pipeline("text-generation", model=model_cons, device_map="auto",
+    pipe_constitution = pipeline("text-generation", model=model_cons, device_map="auto", tokenizer=tokenizer
                                 )
     
     print("Pipelines loaded")
