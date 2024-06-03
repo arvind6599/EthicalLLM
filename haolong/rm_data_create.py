@@ -163,19 +163,19 @@ def create_hf_dataset(df):
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # # quantize for the sake of memory
-    # quantization_config = BitsAndBytesConfig(
-    #         load_in_4bit=True,
-    #         bnb_4bit_quant_type="nf4",
-    #         bnb_4bit_compute_dtype=torch.float16,
-    # )
+    # quantize for the sake of memory
+    quantization_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.float16,
+    )
 
 
     pipe_SL = pipeline("text-generation", model="mistralai/Mistral-7B-Instruct-v0.2", device_map="auto",
-                    # quantization_config=quantization_config, # remove this after
+                     quantization_config=quantization_config, # remove this after
                     )
     pipe_constitution = pipeline("text-generation", model="mistralai/Mistral-7B-Instruct-v0.2", device_map="auto",
-                                # quantization_config=quantization_config, # remove this after
+                                 quantization_config=quantization_config, # remove this after
                                 )
     
     harmful_prompts = load_harmful_data()
