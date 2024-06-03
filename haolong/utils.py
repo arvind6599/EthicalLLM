@@ -1,4 +1,5 @@
 import json, re, os
+import random
 from tqdm import tqdm
 from datasets import load_dataset
 
@@ -7,6 +8,34 @@ def fix_common_json_errors(json_str):
     # Remove trailing commas in objects or arrays
     json_str = re.sub(r',\s*([}\]])', r'\1', json_str)
     return json_str
+
+
+def find_nearest_option(model_generation):
+    """Find the first capital letter in the model output, and return it as the answer.
+    It's not so reliable, but it's a good fallback if the high priority search fails.
+    Failure cases (example):
+    "The answer is D" -> will return T
+    """
+    len_options = 2
+    best_index = len(model_generation)
+    best_char = None
+    characters = [chr(ord('A') + i) for i in range(len_options)] # A, B
+    for char in characters:
+        index = model_generation.find(char)
+        if index != -1 and index < best_index:
+            best_index = index
+            best_char = char
+    # match (a) patterns
+    if best_char is None:
+        for char in characters:
+            pattern = f"({char.lower()})"
+            if pattern in model_generation:
+                best_char = char
+                break
+    if best_char is None:
+        # everything is failing!!!!! do a random guess so that we don't raise an error, which will cause the program to ask again.
+        return chr(ord('A') + random.randint(0, len_options - 1))
+    return best_char
 
 def retrieve_and_parse_response(data: str):
     """Find and parse the JSON data from the model response that may contain nested structures."""
@@ -35,7 +64,9 @@ def retrieve_and_parse_response(data: str):
                 # Reduce the search area by removing the innermost layer of brackets
                 clean_data = re.sub(pattern, '', clean_data, count=1)
             
-            raise ValueError("No JSON parsable data found in the model response after all attempts")
+            # raise ValueError("No JSON parsable data found in the model response after all attempts")
+            first_option = find_nearest_option(data)
+            return {"choice": first_option}
     except ValueError:
         # couldn't find the } in the string, probably because of too long response
         
@@ -52,31 +83,24 @@ def retrieve_and_parse_response(data: str):
                 choice_str = match_simple.group(1)
                 return {"choice": choice_str}
             else:
-                raise ValueError("Too long response, couldn't find anything")
+                # raise ValueError("Too long response, couldn't find anything")
+                first_option = find_nearest_option(data)
+                return {"choice": first_option}
             
             
 def load_harmful_data():
-    if os.path.exists('/scratch/students/haolli/harmful_prompts_anthropic_hh.json'):
-        # load the data directly if exists
-        with open('/scratch/students/haolli/harmful_prompts_anthropic_hh.json', 'r') as file:
-            harmful_prompts = json.load(file)
-        return harmful_prompts
-    else:
-        dataset = load_dataset("Anthropic/hh-rlhf", data_dir="harmless-base", cache_dir="/scratch/students/haolli")
-        # Parsing & saving the harmful prompts
-        harmful_prompts = []
-        for i, sample in tqdm(enumerate(dataset['train'])):
-            conversation = sample['chosen']
-            harmful_prompt = conversation.split("\n\n")[1].split("Human: ")[-1]
-            harmful_prompts.append(harmful_prompt)
-        for i, sample in tqdm(enumerate(dataset['test'])):
-            conversation = sample['chosen']
-            harmful_prompt = conversation.split("\n\n")[1].split("Human: ")[-1]
-            harmful_prompts.append(harmful_prompt)
-
-        with open('/scratch/students/haolli/harmful_prompts_anthropic_hh.json', 'w') as file:
-            json.dump(harmful_prompts, file)
-        return harmful_prompts
+    dataset = load_dataset("Anthropic/hh-rlhf", data_dir="harmless-base")
+    # Parsing & saving the harmful prompts
+    harmful_prompts = []
+    for i, sample in tqdm(enumerate(dataset['train'])):
+        conversation = sample['chosen']
+        harmful_prompt = conversation.split("\n\n")[1].split("Human: ")[-1]
+        harmful_prompts.append(harmful_prompt)
+    for i, sample in tqdm(enumerate(dataset['test'])):
+        conversation = sample['chosen']
+        harmful_prompt = conversation.split("\n\n")[1].split("Human: ")[-1]
+        harmful_prompts.append(harmful_prompt)
+    return harmful_prompts
     
 def reconstruct_conversation(harmful_prompt: str, model_response: str):
     return f"""
