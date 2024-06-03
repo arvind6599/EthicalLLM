@@ -110,7 +110,7 @@ def retrieve_pipe_responses(pipe, prompts, max_new_tokens=32, type_pipe="SFT"):
         ]
 
         # Batch processing for actions
-        actions = pipe(initial_messages, max_new_tokens=max_new_tokens, do_sample=True)
+        actions = pipe(initial_messages, max_new_tokens=max_new_tokens, do_sample=True, eos_token_id=2, pad_token_id=2)
         actions = [action[0]['generated_text'][-1] for action in actions]
 
         # Update messages with actions and new query for motivations
@@ -123,7 +123,7 @@ def retrieve_pipe_responses(pipe, prompts, max_new_tokens=32, type_pipe="SFT"):
         ]
 
         # Batch processing for motivations
-        motivations = pipe(motivation_messages, max_new_tokens=max_new_tokens, do_sample=True)
+        motivations = pipe(motivation_messages, max_new_tokens=max_new_tokens, do_sample=True, eos_token_id=2, pad_token_id=2)
         motivations = [motivation[0]['generated_text'][-1] for motivation in motivations]
 
         # Update messages with motivations and new query for consequences
@@ -136,7 +136,7 @@ def retrieve_pipe_responses(pipe, prompts, max_new_tokens=32, type_pipe="SFT"):
         ]
 
         # Batch processing for consequences
-        consequences = pipe(consequence_messages, max_new_tokens=max_new_tokens, do_sample=True)
+        consequences = pipe(consequence_messages, max_new_tokens=max_new_tokens, do_sample=True, eos_token_id=2, pad_token_id=2)
         consequences = [consequence[0]['generated_text'][-1] for consequence in consequences]
 
         # Compose final responses
@@ -159,7 +159,7 @@ def retrieve_pipe_responses(pipe, prompts, max_new_tokens=32, type_pipe="SFT"):
             for prompt in prompts
         ]
         
-        batch_responses = pipe(initial_messages, max_new_tokens=max_new_tokens, do_sample=True)
+        batch_responses = pipe(initial_messages, max_new_tokens=max_new_tokens, do_sample=True, eos_token_id=2, pad_token_id=2)
         batch_responses = [response[0]['generated_text'][-1] for response in batch_responses]
         responses = batch_responses
 
@@ -308,21 +308,19 @@ if __name__ == "__main__":
     
     tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
     
-    model_sl.generation_config.pad_token_id = tokenizer.pad_token_id
-    model_cons.generation_config.pad_token_id = tokenizer.pad_token_id
+    # model_sl.generation_config.pad_token_id = tokenizer.pad_token_id
+    # model_cons.generation_config.pad_token_id = tokenizer.pad_token_id
+    
+    model_sl.generation_config.pad_token_id = model_sl.generation_config.eos_token_id
+    model_cons.generation_config.pad_token_id = model_cons.generation_config.eos_token_id
 
-    pipe_SL = pipeline("text-generation", model=model_sl, device_map="auto", tokenizer=tokenizer
-                    )
-    pipe_constitution = pipeline("text-generation", model=model_cons, device_map="auto", tokenizer=tokenizer
-                                )
+    pipe_SL = pipeline("text-generation", model=model_sl, device_map="auto", tokenizer=tokenizer)
+    pipe_constitution = pipeline("text-generation", model=model_cons, device_map="auto", tokenizer=tokenizer)
     
     print("Pipelines loaded")
     print("SL device:", pipe_SL.device)
     print("Constitution device:", pipe_constitution.device)
     
-    # suppress warning
-    pipe_SL.call_count = 0
-    pipe_constitution.call_count = 0
     
     
     harmful_prompts = load_harmful_data()
@@ -368,29 +366,30 @@ if __name__ == "__main__":
     #     add_rows_to_df(motivation_data, [new_motivation_data_row_1, new_motivation_data_row_2])
     #     add_rows_to_df(consequences_data, [new_consequence_data_row_1, new_consequence_data_row_2])
     
-    start_time = time.time()
+    cur_time = time.time()
+    start_time = cur_time
     
     # ask twice
     sft_responses_1 = retrieve_pipe_responses(pipe_SL, harmful_prompts, max_new_tokens=32, type_pipe="SFT")
     
     ########################################
+    print(f"Time elapsed for SFT 1: {time.time() - cur_time}")
     cur_time = time.time()
-    print(f"Time elapsed for SFT 1: {cur_time - start_time}")
     ########################################
     
     sft_responses_2 = retrieve_pipe_responses(pipe_SL, harmful_prompts, max_new_tokens=32, type_pipe="SFT")
     
     ########################################
-    cur_time = time.time()
     print(f"Time elapsed for SFT 2: {time.time() - cur_time}")
+    cur_time = time.time()
     ########################################
 
 
     action_data_rows_1, action_data_rows_2 = prepare_new_rows_for_amc_data(harmful_prompts, sft_responses_1, sft_responses_2, virtues, type='action')
     
     ########################################
+    print(f"Time elapsed for constituion action: {time.time() - cur_time}")
     cur_time = time.time()
-    print(f"Time elapsed for constituion action: {cur_time - start_time}")
     ########################################
     
     
@@ -398,8 +397,8 @@ if __name__ == "__main__":
     motivation_data_rows_1, motivation_data_rows_2 = prepare_new_rows_for_amc_data(harmful_prompts, sft_responses_1, sft_responses_2, virtues, type='motivation')
     
     ########################################
+    print(f"Time elapsed for constituion motivation: {time.time() - cur_time}")
     cur_time = time.time()
-    print(f"Time elapsed for constituion motivation: {cur_time - start_time}")
     ########################################
     
     
@@ -407,8 +406,8 @@ if __name__ == "__main__":
     consequence_data_rows_1, consequence_data_rows_2 = prepare_new_rows_for_amc_data(harmful_prompts, sft_responses_1, sft_responses_2, virtues, type='consequence')
 
     ########################################
+    print(f"Time elapsed for constituion consequence: {time.time() - cur_time}")
     cur_time = time.time()
-    print(f"Time elapsed for constituion consequence: {cur_time - start_time}")
     ########################################
 
 
@@ -417,6 +416,9 @@ if __name__ == "__main__":
     action_data = mix_rows(action_data_rows_1, action_data_rows_2)
     motivation_data = mix_rows(motivation_data_rows_1, motivation_data_rows_2)
     consequences_data = mix_rows(consequence_data_rows_1, consequence_data_rows_2)
+    
+    
+    print(f"Time elapsed for all: {time.time() - start_time}")
     
     
     print("DataFrame DONE, converting to hf dataset")
