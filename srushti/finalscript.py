@@ -21,11 +21,6 @@ tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", 
 
 tokenizer.pad_token_id = tokenizer.eos_token_id
 
-batch_size = 4
-revised_data = []
-dataset = load_dataset("fka/awesome-chatgpt-prompts")
-
-
 # num_prompts = len(dataset)
 
 # Access the 'train' split
@@ -45,7 +40,7 @@ train_dataset = dataset['train']
 dataset_input_ids = train_dataset['prompt']
 model.to(device)
 
-batch_size = 32
+batch_size = 16
 revised_data = []
 dataset = load_dataset("fka/awesome-chatgpt-prompts")
 
