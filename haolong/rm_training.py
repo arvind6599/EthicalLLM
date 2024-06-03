@@ -2,24 +2,27 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, HfArgumentParser, 
 from datasets import load_dataset
 from trl import ModelConfig, RewardConfig, RewardTrainer, get_kbit_device_map, get_peft_config, get_quantization_config
 import torch
-
-
-
-
-
+import os
 
 
 if __name__ == "__main__":
-    model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
-    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
+    model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", device_map=device_map)
+    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
+    if tokenizer.pad_token is None:
+        tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
+        model.resize_token_embeddings(len(tokenizer))
+    tokenizer.model_max_length = 256 #NOTE: might wanna change this
+    model.config.pad_token_id = model.config.eos_token_id
     model.to(device)
-    
+    print("Model on device:", device)
+
     ##################
     # data
     ##################
     # NOTE: change this later
-    dataset = load_dataset("Anthropic/hh-rlhf", data_dir="harmless-base")
+    dataset = load_dataset("Tachi67/rm_data_action")
     small_sample_train = dataset['train'].shuffle(seed=42).select(range(20))
     small_sample_test = dataset['test'].shuffle(seed=42).select(range(10))
     
@@ -57,9 +60,9 @@ if __name__ == "__main__":
     ###############
     cmd_args = [
     "--per_device_train_batch_size=32",
-    "--model_name_or_path=facebook/opt-350m",
-    "--output_dir=reward_modeling_anthropic_hh",
-    "--num_train_epochs=1",
+    "--model_name_or_path=mistralai/Mistral-7B-Instruct-v0.2",
+    "--output_dir=reward_modeling_action",
+    "--num_train_epochs=3",
     "--gradient_accumulation_steps=16",
     "--gradient_checkpointing=True",
     "--learning_rate=1.41e-5",
@@ -68,7 +71,7 @@ if __name__ == "__main__":
     "--optim=adamw_torch",
     "--logging_steps=10",
     "--evaluation_strategy=steps",
-    "--max_length=56",
+    "--max_length=256",
     ]
     ################
     # Config parsing
@@ -76,7 +79,6 @@ if __name__ == "__main__":
     parser = HfArgumentParser((RewardConfig, ModelConfig))
     reward_config, model_config = parser.parse_args_into_dataclasses(args=cmd_args)
     reward_config.gradient_checkpointing_kwargs = dict(use_reentrant=False)
-    # print(reward_config.per_device_train_batch_size)
 
     quantization_config = get_quantization_config(model_config)
     model_kwargs = dict(
@@ -103,6 +105,15 @@ if __name__ == "__main__":
         eval_dataset=small_sample_test,
         peft_config=get_peft_config(model_config),
     )
-    trainer.train()
     
+    torch.cuda.empty_cache()
+    torch.cuda.reset_max_memory_allocated(device=device)
+    
+    print("Training...")
+    trainer.train()
+    print("Completed!")
+    print("Pushing to hub...")
+    trainer.model.push_to_hub("Tachi67/EthcalLLM-RM-action")
+    print("Done!")
+
     

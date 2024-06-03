@@ -203,8 +203,8 @@ if __name__ == "__main__":
     model_sl.generation_config.pad_token_id = model_sl.generation_config.eos_token_id
     model_cons.generation_config.pad_token_id = model_cons.generation_config.eos_token_id
 
-    pipe_SL = pipeline("text-generation", model=model_sl, device_map="auto", tokenizer=tokenizer, batch_size=160)
-    pipe_constitution = pipeline("text-generation", model=model_cons, device_map="auto", tokenizer=tokenizer, batch_size=160)
+    pipe_SL = pipeline("text-generation", model=model_sl, device_map="auto", tokenizer=tokenizer, batch_size=128)
+    pipe_constitution = pipeline("text-generation", model=model_cons, device_map="auto", tokenizer=tokenizer, batch_size=128)
     
     pipe_SL.tokenizer.pad_token_id = model_sl.config.eos_token_id
     pipe_constitution.tokenizer.pad_token_id = model_cons.config.eos_token_id
@@ -237,14 +237,14 @@ if __name__ == "__main__":
     start_time = cur_time
     
     # ask twice
-    sft_responses_1 = retrieve_pipe_responses(pipe_SL, harmful_prompts, max_new_tokens=50, type_pipe="SFT")
+    sft_responses_1 = retrieve_pipe_responses(pipe_SL, harmful_prompts, max_new_tokens=40, type_pipe="SFT")
     
     ########################################
     print(f"Time elapsed for SFT 1: {time.time() - cur_time}")
     cur_time = time.time()
     ########################################
     
-    sft_responses_2 = retrieve_pipe_responses(pipe_SL, harmful_prompts, max_new_tokens=50, type_pipe="SFT")
+    sft_responses_2 = retrieve_pipe_responses(pipe_SL, harmful_prompts, max_new_tokens=40, type_pipe="SFT")
     
     ########################################
     print(f"Time elapsed for SFT 2: {time.time() - cur_time}")
