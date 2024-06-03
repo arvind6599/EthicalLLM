@@ -227,3 +227,5 @@ if __name__ == "__main__":
     hf_action_dataset.push_to_hub("Tachi67/rm_data_action")
     hf_motivation_dataset.push_to_hub("Tachi67/rm_data_motivation")
     hf_consequences_dataset.push_to_hub("Tachi67/rm_data_consequences")
+    
+    print("push DONE")
