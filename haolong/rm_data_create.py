@@ -115,7 +115,7 @@ def generate_prompt_to_constitution(virtue: str, harmful_prompt_to_SFT_model: st
     """
     return prompt_to_constitution
 
-def prepare_new_row_for_amc_data(harmful_prompt:str, response_1: str, response_2: str, type='action', virtues=virtues):
+def prepare_new_row_for_amc_data(harmful_prompt:str, response_1: str, response_2: str, type='action', virtues):
     assert type in ['action', 'motivation', 'consequence'], "type must be one of action, motivation, consequence"
     new_row_1 = pd.Series({'conversation': reconstruct_conversation(harmful_prompt, response_1), 'scores': 0})
     new_row_2 = pd.Series({'conversation': reconstruct_conversation(harmful_prompt, response_2), 'scores': 0})
@@ -202,15 +202,18 @@ if __name__ == "__main__":
         new_action_data_row_1, new_action_data_row_2 = prepare_new_row_for_amc_data(harmful_prompt,
                                                                                     SFT_model_response_dict_1["action"],
                                                                                     SFT_model_response_dict_2["action"],
-                                                                                    type='action')
+                                                                                    type='action',
+                                                                                    virtues=virtues)
         new_motivation_data_row_1, new_motivation_data_row_2 = prepare_new_row_for_amc_data(harmful_prompt,
                                                                                             SFT_model_response_dict_1["motivation"],
                                                                                             SFT_model_response_dict_2["motivation"],
-                                                                                            type='motivation')
+                                                                                            type='motivation',
+                                                                                            virtues=virtues)
         new_consequence_data_row_1, new_consequence_data_row_2 = prepare_new_row_for_amc_data(harmful_prompt,
                                                                                             SFT_model_response_dict_1["consequence"],
                                                                                             SFT_model_response_dict_2["consequence"],
-                                                                                            type='consequence')
+                                                                                            type='consequence',
+                                                                                            virtues=virtues)
         
         add_rows_to_df(action_data, [new_action_data_row_1, new_action_data_row_2])
         add_rows_to_df(motivation_data, [new_motivation_data_row_1, new_motivation_data_row_2])
