@@ -305,17 +305,16 @@ if __name__ == "__main__":
 
     model_sl = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", quantization_config=quantization_config, device_map="auto")
     model_cons = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", quantization_config=quantization_config, device_map="auto")
-    
     tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
-    
-    # model_sl.generation_config.pad_token_id = tokenizer.pad_token_id
-    # model_cons.generation_config.pad_token_id = tokenizer.pad_token_id
     
     model_sl.generation_config.pad_token_id = model_sl.generation_config.eos_token_id
     model_cons.generation_config.pad_token_id = model_cons.generation_config.eos_token_id
 
     pipe_SL = pipeline("text-generation", model=model_sl, device_map="auto", tokenizer=tokenizer, batch_size=32)
     pipe_constitution = pipeline("text-generation", model=model_cons, device_map="auto", tokenizer=tokenizer, batch_size=32)
+    
+    pipe_SL.tokenizer.pad_token_id = model_sl.config.eos_token_id
+    pipe_constitution.tokenizer.pad_token_id = model_cons.config.eos_token_id
     
     print("Pipelines loaded")
     print("SL device:", pipe_SL.device)
