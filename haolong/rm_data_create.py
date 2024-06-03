@@ -183,6 +183,11 @@ if __name__ == "__main__":
     print("SL device:", pipe_SL.device)
     print("Constitution device:", pipe_constitution.device)
     
+    # suppress warning
+    pipe_SL.call_count = 0
+    pipe_constitution.call_count = 0
+    
+    
     harmful_prompts = load_harmful_data()
 
     virtues = ["honesty",
@@ -194,13 +199,15 @@ if __name__ == "__main__":
                 ]
     
     # sampling for small scale testing
-    harmful_prompts_exp = random.choices(harmful_prompts, k=5)
+    # harmful_prompts_exp = random.choices(harmful_prompts, k=5)
+    
     action_data = pd.DataFrame(columns=['conversation', 'scores'])
     motivation_data = pd.DataFrame(columns=['conversation', 'scores'])
     consequences_data = pd.DataFrame(columns=['conversation', 'scores'])
+    
 
-    for harmful_prompt in tqdm(harmful_prompts_exp, desc="Processing prompts"):
-    # for harmful_prompt in tqdm(harmful_prompts, desc="Processing prompts"):
+    # for harmful_prompt in tqdm(harmful_prompts_exp, desc="Processing prompts"):
+    for harmful_prompt in tqdm(harmful_prompts, desc="Processing prompts"):
         SFT_model_response_dict_1 = retrieve_pipe_response(pipe_SL, harmful_prompt, max_new_tokens=32)
         SFT_model_response_dict_2 = retrieve_pipe_response(pipe_SL, harmful_prompt, max_new_tokens=32)
         
