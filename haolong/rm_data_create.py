@@ -178,6 +178,10 @@ if __name__ == "__main__":
                                  quantization_config=quantization_config, # remove this after
                                 )
     
+    print("Pipelines loaded")
+    print("SL device:", pipe_SL.device)
+    print("Constitution device:", pipe_constitution.device)
+    
     harmful_prompts = load_harmful_data()
 
     virtues = ["honesty",
