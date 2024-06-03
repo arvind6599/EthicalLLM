@@ -11,3 +11,12 @@ typing
 pandas
 random
 bitsandbytes
+
+
+
+tensorboard
+trl 
+torch --extra-index-url https://download.pytorch.org/whl/cu118
+torchvision --extra-index-url https://download.pytorch.org/whl/cu118
+torchaudio --extra-index-url https://download.pytorch.org/whl/cu118
+peft
