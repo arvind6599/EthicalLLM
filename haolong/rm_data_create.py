@@ -226,7 +226,7 @@ if __name__ == "__main__":
                 ]
     
     # sampling for small scale testing
-    harmful_prompts = random.choices(harmful_prompts, k=10)
+    harmful_prompts = random.choices(harmful_prompts, k=130)
     
     action_data = pd.DataFrame(columns=['conversation', 'scores'])
     motivation_data = pd.DataFrame(columns=['conversation', 'scores'])
