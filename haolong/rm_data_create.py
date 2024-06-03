@@ -115,7 +115,7 @@ def generate_prompt_to_constitution(virtue: str, harmful_prompt_to_SFT_model: st
     """
     return prompt_to_constitution
 
-def prepare_new_row_for_amc_data(harmful_prompt:str, response_1: str, response_2: str, type='action', virtues):
+def prepare_new_row_for_amc_data(harmful_prompt:str, response_1: str, response_2: str, virtues, type='action'):
     assert type in ['action', 'motivation', 'consequence'], "type must be one of action, motivation, consequence"
     new_row_1 = pd.Series({'conversation': reconstruct_conversation(harmful_prompt, response_1), 'scores': 0})
     new_row_2 = pd.Series({'conversation': reconstruct_conversation(harmful_prompt, response_2), 'scores': 0})
