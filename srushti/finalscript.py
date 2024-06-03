@@ -29,7 +29,7 @@ tokenizer.pad_token_id = tokenizer.eos_token_id
 # Extract prompts from the 'train' split
 # dataset_prompt = train_dataset['prompt']
 
-batch_size = 16
+batch_size = 8
 revised_data = []
 dataset = load_dataset("fka/awesome-chatgpt-prompts")
 
