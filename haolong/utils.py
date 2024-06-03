@@ -56,27 +56,18 @@ def retrieve_and_parse_response(data: str):
             
             
 def load_harmful_data():
-    if os.path.exists('/scratch/students/haolli/harmful_prompts_anthropic_hh.json'):
-        # load the data directly if exists
-        with open('/scratch/students/haolli/harmful_prompts_anthropic_hh.json', 'r') as file:
-            harmful_prompts = json.load(file)
-        return harmful_prompts
-    else:
-        dataset = load_dataset("Anthropic/hh-rlhf", data_dir="harmless-base", cache_dir="/scratch/students/haolli")
-        # Parsing & saving the harmful prompts
-        harmful_prompts = []
-        for i, sample in tqdm(enumerate(dataset['train'])):
-            conversation = sample['chosen']
-            harmful_prompt = conversation.split("\n\n")[1].split("Human: ")[-1]
-            harmful_prompts.append(harmful_prompt)
-        for i, sample in tqdm(enumerate(dataset['test'])):
-            conversation = sample['chosen']
-            harmful_prompt = conversation.split("\n\n")[1].split("Human: ")[-1]
-            harmful_prompts.append(harmful_prompt)
-
-        with open('/scratch/students/haolli/harmful_prompts_anthropic_hh.json', 'w') as file:
-            json.dump(harmful_prompts, file)
-        return harmful_prompts
+    dataset = load_dataset("Anthropic/hh-rlhf", data_dir="harmless-base")
+    # Parsing & saving the harmful prompts
+    harmful_prompts = []
+    for i, sample in tqdm(enumerate(dataset['train'])):
+        conversation = sample['chosen']
+        harmful_prompt = conversation.split("\n\n")[1].split("Human: ")[-1]
+        harmful_prompts.append(harmful_prompt)
+    for i, sample in tqdm(enumerate(dataset['test'])):
+        conversation = sample['chosen']
+        harmful_prompt = conversation.split("\n\n")[1].split("Human: ")[-1]
+        harmful_prompts.append(harmful_prompt)
+    return harmful_prompts
     
 def reconstruct_conversation(harmful_prompt: str, model_response: str):
     return f"""
