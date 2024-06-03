@@ -2,7 +2,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from datasets import load_dataset
 from torch.utils.data import DataLoader, Dataset
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 import time
 import json
 
@@ -15,15 +15,11 @@ quantization_config = BitsAndBytesConfig(
     bnb_4bit_compute_dtype=torch.float16,
 )
 
-model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
-tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
+access_token = "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"
+model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
+tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
 
 tokenizer.pad_token_id = tokenizer.eos_token_id
-
-batch_size = 16
-revised_data = []
-dataset = load_dataset("fka/awesome-chatgpt-prompts")
-
 
 # num_prompts = len(dataset)
 
@@ -33,18 +29,7 @@ dataset = load_dataset("fka/awesome-chatgpt-prompts")
 # Extract prompts from the 'train' split
 # dataset_prompt = train_dataset['prompt']
 
-def tokenize_function(examples):
-    return tokenizer(examples["prompt"], padding="max_length", truncation=True)
-
-
-tokenized_dataset = dataset.map(tokenize_function, batched=True)
-
-train_dataset = dataset['train']
-
-dataset_input_ids = train_dataset['prompt']
-model.to(device)
-
-batch_size = 32
+batch_size = 8
 revised_data = []
 dataset = load_dataset("fka/awesome-chatgpt-prompts")
 
