@@ -8,7 +8,7 @@ tyro
 numpy
 typing
 pandas
-
+bitsandbytes
 tensorboard
 trl 
 torch --extra-index-url https://download.pytorch.org/whl/cu118
