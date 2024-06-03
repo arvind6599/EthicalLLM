@@ -8,10 +8,6 @@ tyro
 numpy
 typing
 pandas
-random
-bitsandbytes
-
-
 
 tensorboard
 trl 
