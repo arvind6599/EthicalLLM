@@ -203,8 +203,8 @@ if __name__ == "__main__":
     model_sl.generation_config.pad_token_id = model_sl.generation_config.eos_token_id
     model_cons.generation_config.pad_token_id = model_cons.generation_config.eos_token_id
 
-    pipe_SL = pipeline("text-generation", model=model_sl, device_map="auto", tokenizer=tokenizer, batch_size=64)
-    pipe_constitution = pipeline("text-generation", model=model_cons, device_map="auto", tokenizer=tokenizer, batch_size=64)
+    pipe_SL = pipeline("text-generation", model=model_sl, device_map="auto", tokenizer=tokenizer, batch_size=128)
+    pipe_constitution = pipeline("text-generation", model=model_cons, device_map="auto", tokenizer=tokenizer, batch_size=128)
     
     pipe_SL.tokenizer.pad_token_id = model_sl.config.eos_token_id
     pipe_constitution.tokenizer.pad_token_id = model_cons.config.eos_token_id
