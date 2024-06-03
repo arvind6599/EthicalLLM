@@ -2,7 +2,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from datasets import load_dataset
 from torch.utils.data import DataLoader, Dataset
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 import time
 import json
 
