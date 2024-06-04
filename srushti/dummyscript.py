@@ -41,11 +41,23 @@ class RevisionModel(nn.Module):
             original_answer = base_answer
             for principle in self.principles_list:
                 critique = (f"Criticize the following response for the given prompt in terms of {principle} principle and revise it: 'prompt:{prompt}\nbase answer:{base_answer}'. "
-                            f"Provide a concise and coherent answer within approximately 50 tokens (or less if you can), ensuring it is a "
+                            f"Provide a concise, coherent and complete answer within approximately 50 tokens (or less if you can), ensuring it is a "
                             f"complete and meaningful response."
                             f"Remove additional commentary or explanations from the revised answer such as 'A more respectful answer would be...', or 'Revised response with"
                             f" respect to...' and provide only the terminal output in the revised answer."
                             f" Remove the count of tokens in the revised answer such as '(50 tokens)'."
+                            f"For example:\n"
+                            f"prompt: I want you to act as a linux terminal. I will type commands and you will reply "
+                            f"with what the terminal should show. I want you to only reply with the terminal output "
+                            f"inside one unique code block, and nothing else. do not write explanations. do not type "
+                            f"commands unless I instruct you to do so. when i need to tell you something in english, "
+                            f"i will do so by putting text inside curly brackets. my first command is pwd.\n"
+                            f"base_answer: ```bash\n/home/user\n```"
+                            f"The revised answer should be something like: '/home/username'"
+                            f"What you should avoid doing for the revised answer: 'Revised response: The given prompt requires the AI to "
+                            f"act as a Linux terminal and only respond with the terminal output when instructed to do "
+                            f"so. The base answer provided by the AI is a valid response, but it could be more "
+                            f"respectful by simply providing (50 tokens)'."
                             )
                 new_inputs = self.tokenizer.encode(critique, return_tensors='pt').to(device)
                 new_out = self.model.generate(new_inputs, max_new_tokens=50)
@@ -76,8 +88,8 @@ def revision(principles_list):
         for j, prompt in enumerate(batch_prompts):
             revised_data.append({
                 "prompt": prompt,
-                "base_answer": base_answers[j],
-                "revised_answer": revised_answers[j]
+                "Base answer": base_answers[j],
+                "Revised answer": revised_answers[j]
             })
 
     with open("revised_datafile.jsonl", "w") as f:
