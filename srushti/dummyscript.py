@@ -17,7 +17,7 @@ tokenizer.pad_token_id = tokenizer.eos_token_id
 
 batch_size = 16
 revised_data = []
-dataset = load_dataset("fka/awesome-chatgpt-prompts")
+dataset = load_dataset("DIBT/10k_prompts_ranked")
 num_prompts = len(dataset)
 
 # Access the 'train' split
@@ -26,7 +26,7 @@ train_dataset = dataset['train']
 # Extract prompts from the 'train' split
 dataset_prompt = train_dataset['prompt']
 model.to(device)
-dataset_prompt = dataset_prompt[:32]
+
 
 class RevisionModel(nn.Module):
     def __init__(self, model, tokenizer, principles_list):
@@ -77,11 +77,11 @@ def revision(principles_list):
         for j, prompt in enumerate(batch_prompts):
             revised_data.append({
                 "prompt": prompt,
-                "Base answer": base_answers[j],
-                "Revised answer": revised_answers[j]
+                "base_answer": base_answers[j],
+                "revised_answer": revised_answers[j]
             })
 
-    with open("revised_datafile.jsonl", "w") as f:
+    with open("revised_datafile_10k.jsonl", "w") as f:
         for data in revised_data:
             json_line = json.dumps(data)
             f.write(json_line + "\n")
