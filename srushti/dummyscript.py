@@ -15,7 +15,7 @@ tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", 
 
 tokenizer.pad_token_id = tokenizer.eos_token_id
 
-batch_size = 16
+batch_size = 15
 revised_data = []
 dataset = load_dataset("DIBT/10k_prompts_ranked")
 num_prompts = len(dataset)
