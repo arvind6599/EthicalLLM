@@ -41,10 +41,11 @@ class RevisionModel(nn.Module):
             original_answer = base_answer
             for principle in self.principles_list:
                 critique = (f"Criticize the following response for the given prompt in terms of {principle} principle and revise it: 'prompt:{prompt}\nbase answer:{base_answer}'. "
-                            f"Provide a concise and coherent answer, ensuring it is a "
+                            f"Provide a concise and coherent answer within approximately 50 tokens (or less if you can), ensuring it is a "
                             f"complete and meaningful response."
-                            f"Remove additional commentary from the revised answer such as 'A more respectful answer would be...', or 'Revised response with"
+                            f"Remove additional commentary or explanations from the revised answer such as 'A more respectful answer would be...', or 'Revised response with"
                             f" respect to...' and provide only the terminal output in the revised answer."
+                            f" Remove the count of tokens in the revised answer such as '(50 tokens)'."
                             )
                 new_inputs = self.tokenizer.encode(critique, return_tensors='pt').to(device)
                 new_out = self.model.generate(new_inputs, max_new_tokens=50)
