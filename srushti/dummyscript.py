@@ -15,7 +15,7 @@ tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", 
 
 tokenizer.pad_token_id = tokenizer.eos_token_id
 
-batch_size = 32
+batch_size = 20
 revised_data = []
 dataset = load_dataset("fka/awesome-chatgpt-prompts")
 num_prompts = len(dataset)
@@ -40,11 +40,12 @@ class RevisionModel(nn.Module):
         for prompt, base_answer in zip(prompts, base_answers):
             original_answer = base_answer
             for principle in self.principles_list:
-                critique = (f"Revise the following response with respect to {principle}: '{base_answer}'. "
+                critique = (f"Criticize the following response in terms of {principle} principle and revise it: '{base_answer}'. "
                             f"Provide a concise and coherent answer within approximately 50 tokens, ensuring it is a "
                             f"complete and meaningful response."
-                            f"meta-commentary such as 'A more respectful answer would be...', or 'Revised response with"
-                            f" respect to...'."
+                            f"Remove additional commentary from the revised answer such as 'A more respectful answer would be...', or 'Revised response with"
+                            f" respect to...' and provide only the terminal output in the revised answer."
+                            f" Remove the count of tokens in the revised answer such as '(50 tokens)'."
                             )
                 new_inputs = self.tokenizer.encode(critique, return_tensors='pt').to(device)
                 new_out = self.model.generate(new_inputs, max_new_tokens=50)
