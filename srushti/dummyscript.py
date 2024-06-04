@@ -54,7 +54,7 @@ class RevisionModel(nn.Module):
                             f"i will do so by putting text inside curly brackets. my first command is pwd.\n"
                             f"base_answer: ```bash\n/home/user\n```"
                             f"The revised answer should be something like: '/home/username'"
-                            f"What you should avoid doing for the revised answer: 'Revised response: The given prompt requires the AI to "
+                            f"What you should avoid doing for the revised answer: '\n\nRevised response:\n\n The given prompt requires the AI to "
                             f"act as a Linux terminal and only respond with the terminal output when instructed to do "
                             f"so. The base answer provided by the AI is a valid response, but it could be more "
                             f"respectful by simply providing (50 tokens)'."
