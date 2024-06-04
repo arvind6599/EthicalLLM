@@ -13,7 +13,7 @@ if __name__ == "__main__":
     if tokenizer.pad_token is None:
         tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
         model.resize_token_embeddings(len(tokenizer))
-    tokenizer.model_max_length = 256 #NOTE: might wanna change this
+    tokenizer.model_max_length = 100 #NOTE: remember to add truncation=True
     model.config.pad_token_id = model.config.eos_token_id
     model.to(device)
     print("Model on device:", device)
@@ -34,9 +34,8 @@ if __name__ == "__main__":
             "attention_mask_rejected": [],
         }
         for chosen, rejected in zip(examples["chosen"], examples["rejected"]):
-            tokenized_chosen = tokenizer(chosen)
-            tokenized_rejected = tokenizer(rejected)
-
+            tokenized_chosen = tokenizer(chosen, truncation=True)
+            tokenized_rejected = tokenizer(rejected, truncation=True)
             new_examples["input_ids_chosen"].append(tokenized_chosen["input_ids"])
             new_examples["attention_mask_chosen"].append(tokenized_chosen["attention_mask"])
             new_examples["input_ids_rejected"].append(tokenized_rejected["input_ids"])
