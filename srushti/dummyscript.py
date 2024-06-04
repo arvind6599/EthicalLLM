@@ -7,7 +7,7 @@ from tqdm import tqdm
 import time
 import json
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 
 access_token = "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"
 model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
