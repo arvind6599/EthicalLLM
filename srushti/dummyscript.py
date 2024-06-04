@@ -26,7 +26,7 @@ train_dataset = dataset['train']
 # Extract prompts from the 'train' split
 dataset_prompt = train_dataset['prompt']
 model.to(device)
-dataset_prompt = dataset_prompt[:50]
+dataset_prompt = dataset_prompt[:32]
 
 class RevisionModel(nn.Module):
     def __init__(self, model, tokenizer, principles_list):
@@ -46,18 +46,7 @@ class RevisionModel(nn.Module):
                             f"Remove additional commentary or explanations from the revised answer such as 'A more respectful answer would be...', or 'Revised response with"
                             f" respect to...' and provide only the terminal output in the revised answer."
                             f" Remove the count of tokens in the revised answer such as '(50 tokens)'."
-                            f"For example:\n"
-                            f"prompt: I want you to act as a linux terminal. I will type commands and you will reply "
-                            f"with what the terminal should show. I want you to only reply with the terminal output "
-                            f"inside one unique code block, and nothing else. do not write explanations. do not type "
-                            f"commands unless I instruct you to do so. when i need to tell you something in english, "
-                            f"i will do so by putting text inside curly brackets. my first command is pwd.\n"
-                            f"base_answer: ```bash\n/home/user\n```"
-                            f"The revised answer should be something like: '/home/username'"
-                            f"What you should avoid doing for the revised answer: '\n\nRevised response:\n\n The given prompt requires the AI to "
-                            f"act as a Linux terminal and only respond with the terminal output when instructed to do "
-                            f"so. The base answer provided by the AI is a valid response, but it could be more "
-                            f"respectful by simply providing (50 tokens)'."
+                            f" Remove any '\n\n Revised response: \n\n' from the revised response."
                             )
                 new_inputs = self.tokenizer.encode(critique, return_tensors='pt').to(device)
                 new_out = self.model.generate(new_inputs, max_new_tokens=50)
