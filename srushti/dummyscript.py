@@ -9,13 +9,13 @@ import json
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 
-access_token = "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"
+access_token = "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"
 model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
 tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
 
 tokenizer.pad_token_id = tokenizer.eos_token_id
 
-batch_size = 8
+batch_size = 16
 revised_data = []
 dataset = load_dataset("fka/awesome-chatgpt-prompts")
 num_prompts = len(dataset)
