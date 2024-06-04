@@ -17,7 +17,7 @@ tokenizer.pad_token_id = tokenizer.eos_token_id
 
 batch_size = 16
 revised_data = []
-dataset = load_dataset("fka/awesome-chatgpt-prompts")
+dataset = load_dataset("fka/awesome-chatgpt-prompts")[:50]
 num_prompts = len(dataset)
 
 # Access the 'train' split
