@@ -17,7 +17,7 @@ tokenizer.pad_token_id = tokenizer.eos_token_id
 
 batch_size = 16
 revised_data = []
-dataset = load_dataset("fka/awesome-chatgpt-prompts")[:50]
+dataset = load_dataset("fka/awesome-chatgpt-prompts")
 num_prompts = len(dataset)
 
 # Access the 'train' split
@@ -26,7 +26,7 @@ train_dataset = dataset['train']
 # Extract prompts from the 'train' split
 dataset_prompt = train_dataset['prompt']
 model.to(device)
-
+dataset_prompt = dataset_prompt[:50]
 
 class RevisionModel(nn.Module):
     def __init__(self, model, tokenizer, principles_list):
