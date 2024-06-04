@@ -45,7 +45,7 @@ class RevisionModel(nn.Module):
                             f"complete and meaningful response."
                             f"Remove additional commentary or explanations from the revised answer such as 'A more respectful answer would be...', or 'Revised response with"
                             f" respect to...' and provide only the terminal output in the revised answer."
-                            f" Remove the count of tokens in the revised answer such as '(50 tokens)'."
+                            f" Remove the token count from the revised answer such as '(50 tokens)'."
                             f" Remove any '\n\n Revised response: \n\n' from the revised response."
                             )
                 new_inputs = self.tokenizer.encode(critique, return_tensors='pt').to(self.model.device)
