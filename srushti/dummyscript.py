@@ -15,7 +15,13 @@ tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", 
 
 tokenizer.pad_token_id = tokenizer.eos_token_id
 
-batch_size = 6
+
+def remove_outliers(data, threshold):
+    filtered_data = [prompt for prompt in data if len(prompt) <= threshold]
+    return filtered_data
+
+
+batch_size = 16
 revised_data = []
 dataset = load_dataset("DIBT/10k_prompts_ranked")
 num_prompts = len(dataset)
@@ -26,7 +32,11 @@ train_dataset = dataset['train']
 # Extract prompts from the 'train' split
 dataset_prompt = train_dataset['prompt']
 model.to(device)
-dataset_prompt = dataset_prompt[:5000]
+
+length_threshold = 600  # Example threshold
+
+# Remove outliers from the dataset
+filtered_dataset = remove_outliers(dataset, length_threshold)
 
 
 class RevisionModel(nn.Module):
@@ -41,14 +51,15 @@ class RevisionModel(nn.Module):
         for prompt, base_answer in zip(prompts, base_answers):
             original_answer = base_answer
             for principle in self.principles_list:
-                critique = (f"Criticize the following response for the given prompt in terms of {principle} principle and revise it: 'prompt:{prompt}\nbase answer:{base_answer}'. "
-                            f"Provide a concise, coherent and complete answer within approximately 50 tokens (or less if you can), ensuring it is a "
-                            f"complete, meaningful, direct and finished response."
-                            f"Remove additional commentary or explanations from the revised answer such as 'A more respectful answer would be...', or 'Revised response with"
-                            f" respect to...' and provide only the terminal output in the revised answer."
-                            f" Remove the token count from the revised answer such as '(50 tokens)'."
-                            f" Remove any '\n\n Revised response: \n\n' from the revised response."
-                            )
+                critique = (
+                    f"Criticize the following response for the given prompt in terms of {principle} principle and revise it: 'prompt:{prompt}\nbase answer:{base_answer}'. "
+                    f"Provide a concise, coherent and complete answer within approximately 50 tokens (or less if you can), ensuring it is a "
+                    f"complete, meaningful, direct and finished response."
+                    f"Remove additional commentary or explanations from the revised answer such as 'A more respectful answer would be...', or 'Revised response with"
+                    f" respect to...' and provide only the terminal output in the revised answer."
+                    f" Remove the token count from the revised answer such as '(50 tokens)'."
+                    f" Remove any '\n\n Revised response: \n\n' from the revised response."
+                    )
                 new_inputs = self.tokenizer.encode(critique, return_tensors='pt').to(self.model.device)
                 with torch.no_grad():
                     new_out = self.model.generate(new_inputs, max_new_tokens=50)
@@ -75,8 +86,8 @@ def revision(principles_list):
 
         base_answers = [tokenizer.decode(out, skip_special_tokens=True) for out in output]
 
-        #revision_model = RevisionModel(model, tokenizer, principles_list).to(device)
-        #revision_model = nn.DataParallel(revision_model)
+        # revision_model = RevisionModel(model, tokenizer, principles_list).to(device)
+        # revision_model = nn.DataParallel(revision_model)
 
         revised_answers = revision_model(batch_prompts, base_answers)
 
