@@ -94,7 +94,7 @@ if __name__ == "__main__":
     # train
     ###############
     cmd_args = [
-    "--per_device_train_batch_size=16",
+    "--per_device_train_batch_size=32",
     "--output_dir=reward_modeling_action",
     "--num_train_epochs=3",
     "--gradient_accumulation_steps=16",
