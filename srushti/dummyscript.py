@@ -27,7 +27,7 @@ train_dataset = dataset['train']
 # Extract prompts from the 'train' split
 dataset_prompt = train_dataset['human_turn0']
 model.to(device)
-dataset_prompt = dataset_prompt[:5000]
+dataset_prompt = dataset_prompt[:4000]
 
 
 class RevisionModel(nn.Module):
