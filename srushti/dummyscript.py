@@ -9,13 +9,15 @@ import json
 
 
 class JSONLDataset(Dataset):
-    def __init__(self, file_path, num_samples=None):
+    def __init__(self, file_path, num_samples=None, shuffle=False):
         self.data = []
         with open(file_path, 'r') as f:
             for line in f:
                 self.data.append(json.loads(line.strip()))
         if shuffle:
             random.shuffle(self.data)
+        if num_samples:
+            self.data = self.data[:num_samples]
 
     def __len__(self):
         return len(self.data)
@@ -26,15 +28,16 @@ class JSONLDataset(Dataset):
 
 batch_size = 32
 revised_data = []
+shuffle = True
 
 file_path = "dataset/red_team_attempts.jsonl"
 sampleNumber = 32
-dataset = JSONLDataset(file_path, num_samples=sampleNumber)
-data_loader = DataLoader(dataset, batch_size=16, shuffle=True)
+dataset = JSONLDataset(file_path, num_samples=sampleNumber, shuffle=shuffle)
+data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 
-access_token = "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"
+access_token = "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"
 model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
 tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
 
