@@ -54,10 +54,11 @@ if __name__ == "__main__":
     ##################
     # data
     ##################
-    # NOTE: now, full dataset is used for training
+    # NOTE:
+    # NOTE: training on sampled dataset
     dataset = load_dataset("Tachi67/rm_data_action")
-    small_sample_train = dataset['train']# .shuffle(seed=42).select(range(20))
-    small_sample_test = dataset['test']#.shuffle(seed=42).select(range(10))
+    small_sample_train = dataset['train'].shuffle(seed=42).select(range(200))
+    small_sample_test = dataset['test'].shuffle(seed=42).select(range(10))
     
     def preprocess_function(examples, tokenizer=tokenizer):
         new_examples = {
@@ -67,8 +68,8 @@ if __name__ == "__main__":
             "attention_mask_rejected": [],
         }
         for chosen, rejected in zip(examples["chosen"], examples["rejected"]):
-            tokenized_chosen = tokenizer(chosen, truncation=True)
-            tokenized_rejected = tokenizer(rejected, truncation=True)
+            tokenized_chosen = tokenizer(chosen, truncation=True, padding="max_length")
+            tokenized_rejected = tokenizer(rejected, truncation=True, padding="max_length")
             new_examples["input_ids_chosen"].append(tokenized_chosen["input_ids"])
             new_examples["attention_mask_chosen"].append(tokenized_chosen["attention_mask"])
             new_examples["input_ids_rejected"].append(tokenized_rejected["input_ids"])
@@ -93,7 +94,7 @@ if __name__ == "__main__":
     # train
     ###############
     cmd_args = [
-    "--per_device_train_batch_size=64",
+    "--per_device_train_batch_size=16",
     "--output_dir=reward_modeling_action",
     "--num_train_epochs=3",
     "--gradient_accumulation_steps=16",
@@ -133,8 +134,8 @@ if __name__ == "__main__":
         peft_config=lora_config,
     )
     
-    torch.cuda.empty_cache()
-    torch.cuda.reset_max_memory_allocated(device=device)
+    # torch.cuda.empty_cache()
+    # torch.cuda.reset_max_memory_allocated(device=device)
     
     start = time.time()
     print("Training...")
