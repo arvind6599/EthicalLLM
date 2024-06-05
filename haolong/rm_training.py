@@ -34,8 +34,8 @@ if __name__ == "__main__":
         model_for_classification.resize_token_embeddings(len(tokenizer))
     # tokenizer.model_max_length = 100 #NOTE: remember to add truncation=True
     model_for_classification.config.pad_token_id = model_for_classification.config.eos_token_id
-    model_for_classification.to(device)
-    print("Model on device:", device)
+    # model_for_classification.to(device)
+    # print("Model on device:", device)
     
     print("Model loaded!")
 
