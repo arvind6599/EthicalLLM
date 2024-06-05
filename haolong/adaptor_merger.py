@@ -18,6 +18,6 @@ if __name__ == "__main__":
     tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
     if tokenizer.pad_token is None:
             tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
-    for type in ['action', 'motivation', 'consequences']:
+    for type in ['action','motivation', 'consequences']:
         merge_and_upload(type, tokenizer)
     print("All models uploaded!")
