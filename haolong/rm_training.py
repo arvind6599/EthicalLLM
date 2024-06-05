@@ -58,7 +58,7 @@ if __name__ == "__main__":
     # train
     ###############
     cmd_args = [
-    "--per_device_train_batch_size=32",
+    "--per_device_train_batch_size=16",
     "--model_name_or_path=mistralai/Mistral-7B-Instruct-v0.2",
     "--output_dir=reward_modeling_action",
     "--num_train_epochs=3",
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     "--optim=adamw_torch",
     "--logging_steps=10",
     "--evaluation_strategy=steps",
-    "--max_length=256",
+    "--max_length=100",
     ]
     ################
     # Config parsing
