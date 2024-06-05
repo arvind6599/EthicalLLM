@@ -16,7 +16,7 @@ tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", 
 tokenizer.pad_token_id = tokenizer.eos_token_id
 
 
-batch_size = 32
+batch_size = 64
 revised_data = []
 dataset = load_dataset("HuggingFaceH4/hh-rlhf")
 num_prompts = len(dataset)
@@ -27,7 +27,7 @@ train_dataset = dataset['train']
 # Extract prompts from the 'train' split
 dataset_prompt = train_dataset['human_turn0']
 model.to(device)
-dataset_prompt = dataset_prompt[:10000]
+dataset_prompt = dataset_prompt[:5000]
 
 
 class RevisionModel(nn.Module):
