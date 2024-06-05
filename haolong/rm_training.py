@@ -56,7 +56,7 @@ if __name__ == "__main__":
     ##################
     # NOTE:
     # NOTE: training on complete dataset
-    dataset = load_dataset("Tachi67/rm_data_motivation")
+    dataset = load_dataset("Tachi67/rm_data_consequences")
     small_sample_train = dataset['train']#.shuffle(seed=42).select(range(200))
     small_sample_test = dataset['test']#.shuffle(seed=42).select(range(10))
     
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     ###############
     cmd_args = [
     "--per_device_train_batch_size=20",
-    "--output_dir=reward_modeling_motivation",
+    "--output_dir=reward_modeling_consequences",
     "--num_train_epochs=2",
     "--gradient_accumulation_steps=16",
     "--gradient_checkpointing=True",
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     print("Completed!")
     print("Time taken for rm training:", time.time() - start)
     print("Pushing to hub...")
-    trainer.model.push_to_hub("Tachi67/EthcalLLM-RM-motivation")
+    trainer.model.push_to_hub("Tachi67/EthcalLLM-RM-consequences")
     print("Done!")
 
     
