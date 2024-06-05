@@ -55,10 +55,10 @@ if __name__ == "__main__":
     # data
     ##################
     # NOTE:
-    # NOTE: training on sampled dataset
+    # NOTE: training on complete dataset
     dataset = load_dataset("Tachi67/rm_data_action")
-    small_sample_train = dataset['train'].shuffle(seed=42).select(range(200))
-    small_sample_test = dataset['test'].shuffle(seed=42).select(range(10))
+    small_sample_train = dataset['train']#.shuffle(seed=42).select(range(200))
+    small_sample_test = dataset['test']#.shuffle(seed=42).select(range(10))
     
     def preprocess_function(examples, tokenizer=tokenizer):
         new_examples = {
@@ -94,9 +94,9 @@ if __name__ == "__main__":
     # train
     ###############
     cmd_args = [
-    "--per_device_train_batch_size=32",
+    "--per_device_train_batch_size=20",
     "--output_dir=reward_modeling_action",
-    "--num_train_epochs=3",
+    "--num_train_epochs=2",
     "--gradient_accumulation_steps=16",
     "--gradient_checkpointing=True",
     "--learning_rate=1.41e-5",
