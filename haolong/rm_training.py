@@ -8,15 +8,28 @@ import time
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
-    model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", device_map=device_map)
+    # old code
+    # model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", device_map=device_map)
+    
+    
+    # new code: 直接加载用于序列分类的模型，配置自动匹配分类任务
+    config = AutoConfig.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", num_labels=2)
+    model_for_classification = AutoModelForSequenceClassification.from_pretrained(
+        "mistralai/Mistral-7B-Instruct-v0.2", 
+        config=config,
+        device_map=device_map
+    )
+    
     tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
     if tokenizer.pad_token is None:
         tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
-        model.resize_token_embeddings(len(tokenizer))
+        model_for_classification.resize_token_embeddings(len(tokenizer))
     tokenizer.model_max_length = 100 #NOTE: remember to add truncation=True
-    model.config.pad_token_id = model.config.eos_token_id
-    model.to(device)
+    model_for_classification.config.pad_token_id = model_for_classification.config.eos_token_id
+    model_for_classification.to(device)
     print("Model on device:", device)
+    
+    print("Model loaded!")
 
     ##################
     # data
@@ -54,6 +67,8 @@ if __name__ == "__main__":
         num_proc=4,
     )
     
+    print("Data loaded!")
+    
     ###############
     # train
     ###############
@@ -86,14 +101,13 @@ if __name__ == "__main__":
         device_map=get_kbit_device_map() if quantization_config is not None else None,
         quantization_config=quantization_config,
     )
-    
-    # model conversion
-    config = AutoConfig.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", num_labels=2)
-    model_for_classification = AutoModelForSequenceClassification.from_config(config)
-
-    # copy the original weights from the original model to the new model, except the classification head
-    model_for_classification.base_model = model.base_model
-    model_for_classification.to(device)
+    # old code
+    # # model conversion
+    # config = AutoConfig.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", num_labels=2)
+    # model_for_classification = AutoModelForSequenceClassification.from_config(config)
+    # # copy the original weights from the original model to the new model, except the classification head
+    # model_for_classification.base_model = model.base_model
+    # model_for_classification.to(device)
     
     # train
     trainer = RewardTrainer(
