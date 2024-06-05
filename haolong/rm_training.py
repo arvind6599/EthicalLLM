@@ -4,6 +4,13 @@ from trl import ModelConfig, RewardConfig, RewardTrainer, get_kbit_device_map, g
 import torch
 import os
 import time
+from peft import (
+    LoraConfig,
+    TaskType,
+    get_peft_model,
+    get_peft_model_state_dict,
+    set_peft_model_state_dict
+)
 
 
 if __name__ == "__main__":
@@ -36,6 +43,20 @@ if __name__ == "__main__":
     model_for_classification.config.pad_token_id = model_for_classification.config.eos_token_id
     # model_for_classification.to(device)
     # print("Model on device:", device)
+    
+    # lora config
+    LORA_R = 8
+    LORA_ALPHA = 32
+    LORA_DROPOUT = 0.1
+    lora_config = LoraConfig(
+        task_type=TaskType.SEQ_CLS,
+        inference_mode=False,
+        r=LORA_R, # LoRA中低秩近似的秩
+        lora_alpha=LORA_ALPHA, # 见上文中的低秩矩阵缩放超参数
+        lora_dropout=LORA_DROPOUT, # LoRA层的dropout
+        bias='none'
+    )
+    
     
     print("Model loaded!")
 
@@ -96,6 +117,8 @@ if __name__ == "__main__":
     "--max_length=100",
     "--save_total_limit=1",
     "--load_best_model_at_end=True",
+    "--fp16=True",
+    "--fp16_opt_level=O1",
     ]
     ################
     # Config parsing
@@ -126,7 +149,7 @@ if __name__ == "__main__":
         args=reward_config,
         train_dataset=small_sample_train,
         eval_dataset=small_sample_test,
-        peft_config=get_peft_config(model_config),
+        peft_config=lora_config,
     )
     
     torch.cuda.empty_cache()
