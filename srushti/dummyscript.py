@@ -7,18 +7,33 @@ from tqdm import tqdm
 import time
 import json
 import random
+import re
 
 
 class JSONLDataset(Dataset):
     def __init__(self, file_path, num_samples=None, shuffle=False):
         self.data = []
         with open(file_path, 'r') as f:
-            for line in f:
-                self.data.append(json.loads(line.strip()))
+            for line_number, line in enumerate(f, 1):
+                try:
+                    transcript = json.loads(line.strip())['transcript']
+                    first_human_question = self.extract_first_human_question(transcript)
+                    if first_human_question:
+                        self.data.append({"prompt": first_human_question})
+                except json.JSONDecodeError as e:
+                    print(f"Error decoding JSON on line {line_number}: {e}")
+
         if shuffle:
             random.shuffle(self.data)
+
         if num_samples:
             self.data = self.data[:num_samples]
+
+    def extract_first_human_question(self, transcript):
+        human_statements = re.findall(r'Human: (.*?)(?=(\n\nAssistant:|\Z))', transcript, re.DOTALL)
+        if human_statements:
+            return human_statements[0][0].strip()
+        return None
 
     def __len__(self):
         return len(self.data)
