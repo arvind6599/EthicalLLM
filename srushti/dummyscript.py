@@ -17,7 +17,7 @@ tokenizer.pad_token_id = tokenizer.eos_token_id
 
 batch_size = 16
 revised_data = []
-dataset = load_dataset("fka/awesome-chatgpt-prompts")
+dataset = load_dataset("DIBT/10k_prompts_ranked")
 num_prompts = len(dataset)
 
 # Access the 'train' split
@@ -42,7 +42,7 @@ class RevisionModel(nn.Module):
             for principle in self.principles_list:
                 critique = (f"Criticize the following response for the given prompt in terms of {principle} principle and revise it: 'prompt:{prompt}\nbase answer:{base_answer}'. "
                             f"Provide a concise, coherent and complete answer within approximately 50 tokens (or less if you can), ensuring it is a "
-                            f"complete and meaningful response."
+                            f"complete, meaningful, direct and finished response."
                             f"Remove additional commentary or explanations from the revised answer such as 'A more respectful answer would be...', or 'Revised response with"
                             f" respect to...' and provide only the terminal output in the revised answer."
                             f" Remove the token count from the revised answer such as '(50 tokens)'."
@@ -88,7 +88,7 @@ def revision(principles_list):
 
         torch.cuda.empty_cache()
 
-    with open("revised_datafile.jsonl", "w") as f:
+    with open("revised_datafile_10k.jsonl", "w") as f:
         for data in revised_data:
             json_line = json.dumps(data)
             f.write(json_line + "\n")
