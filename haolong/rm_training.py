@@ -1,9 +1,10 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, HfArgumentParser, AutoConfig, AutoModelForSequenceClassification
+from transformers import BitsAndBytesConfig, AutoModelForCausalLM, AutoTokenizer, HfArgumentParser, AutoConfig, AutoModelForSequenceClassification
 from datasets import load_dataset
 from trl import ModelConfig, RewardConfig, RewardTrainer, get_kbit_device_map, get_peft_config, get_quantization_config
 import torch
 import os
 import time
+
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -13,18 +14,25 @@ if __name__ == "__main__":
     
     
     # new code: 直接加载用于序列分类的模型，配置自动匹配分类任务
+    quantization_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.float16,
+    )
+    
     config = AutoConfig.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", num_labels=2)
     model_for_classification = AutoModelForSequenceClassification.from_pretrained(
         "mistralai/Mistral-7B-Instruct-v0.2", 
         config=config,
+        quantization_config=quantization_config,
         device_map=device_map
     )
     
-    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
+    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", max_length=100, padding="max_length", truncation=True)
     if tokenizer.pad_token is None:
         tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
         model_for_classification.resize_token_embeddings(len(tokenizer))
-    tokenizer.model_max_length = 100 #NOTE: remember to add truncation=True
+    # tokenizer.model_max_length = 100 #NOTE: remember to add truncation=True
     model_for_classification.config.pad_token_id = model_for_classification.config.eos_token_id
     model_for_classification.to(device)
     print("Model on device:", device)
@@ -74,7 +82,7 @@ if __name__ == "__main__":
     ###############
     cmd_args = [
     "--per_device_train_batch_size=16",
-    "--model_name_or_path=mistralai/Mistral-7B-Instruct-v0.2",
+    # "--model_name_or_path=mistralai/Mistral-7B-Instruct-v0.2",
     "--output_dir=reward_modeling_action",
     "--num_train_epochs=3",
     "--gradient_accumulation_steps=16",
@@ -86,6 +94,8 @@ if __name__ == "__main__":
     "--logging_steps=10",
     "--evaluation_strategy=steps",
     "--max_length=100",
+    "--save_total_limit=1",
+    "--load_best_model_at_end=True",
     ]
     ################
     # Config parsing
@@ -94,12 +104,12 @@ if __name__ == "__main__":
     reward_config, model_config = parser.parse_args_into_dataclasses(args=cmd_args)
     reward_config.gradient_checkpointing_kwargs = dict(use_reentrant=False)
 
-    quantization_config = get_quantization_config(model_config)
+    # quantization_config = get_quantization_config(model_config)
     model_kwargs = dict(
         revision=model_config.model_revision,
         trust_remote_code=model_config.trust_remote_code,
         device_map=get_kbit_device_map() if quantization_config is not None else None,
-        quantization_config=quantization_config,
+        # quantization_config=quantization_config,
     )
     # old code
     # # model conversion
