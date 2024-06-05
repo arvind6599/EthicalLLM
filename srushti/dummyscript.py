@@ -25,7 +25,7 @@ num_prompts = len(dataset)
 train_dataset = dataset['train']
 
 # Extract prompts from the 'train' split
-dataset_prompt = train_dataset['prompt']
+dataset_prompt = train_dataset['human_turn0']
 model.to(device)
 
 
