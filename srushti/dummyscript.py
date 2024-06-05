@@ -36,7 +36,7 @@ model.to(device)
 length_threshold = 600  # Example threshold
 
 # Remove outliers from the dataset
-filtered_dataset = remove_outliers(dataset, length_threshold)
+dataset_prompt = remove_outliers(dataset, length_threshold)
 
 
 class RevisionModel(nn.Module):
