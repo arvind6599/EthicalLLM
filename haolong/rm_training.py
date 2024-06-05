@@ -3,7 +3,7 @@ from datasets import load_dataset
 from trl import ModelConfig, RewardConfig, RewardTrainer, get_kbit_device_map, get_peft_config, get_quantization_config
 import torch
 import os
-
+import time
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -108,9 +108,11 @@ if __name__ == "__main__":
     torch.cuda.empty_cache()
     torch.cuda.reset_max_memory_allocated(device=device)
     
+    start = time.time()
     print("Training...")
     trainer.train()
     print("Completed!")
+    print("Time taken for rm training:", time.time() - start)
     print("Pushing to hub...")
     trainer.model.push_to_hub("Tachi67/EthcalLLM-RM-action")
     print("Done!")
