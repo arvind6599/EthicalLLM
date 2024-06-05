@@ -16,7 +16,7 @@ tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", 
 tokenizer.pad_token_id = tokenizer.eos_token_id
 
 
-batch_size = 64
+batch_size = 32
 revised_data = []
 dataset = load_dataset("HuggingFaceH4/hh-rlhf")
 num_prompts = len(dataset)
