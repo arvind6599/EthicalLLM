@@ -57,8 +57,8 @@ if __name__ == "__main__":
     # NOTE:
     # NOTE: training on sampled dataset
     dataset = load_dataset("Tachi67/rm_data_action")
-    small_sample_train = dataset['train'].shuffle(seed=42).select(range(2000))
-    small_sample_test = dataset['test'].shuffle(seed=42).select(range(100))
+    small_sample_train = dataset['train'].shuffle(seed=42).select(range(200))
+    small_sample_test = dataset['test'].shuffle(seed=42).select(range(10))
     
     def preprocess_function(examples, tokenizer=tokenizer):
         new_examples = {
