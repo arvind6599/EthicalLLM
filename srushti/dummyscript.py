@@ -16,14 +16,9 @@ tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", 
 tokenizer.pad_token_id = tokenizer.eos_token_id
 
 
-def remove_outliers(data, threshold):
-    filtered_data = [prompt for prompt in data if len(prompt) <= threshold]
-    return filtered_data
-
-
 batch_size = 16
 revised_data = []
-dataset = load_dataset("DIBT/10k_prompts_ranked")
+dataset = load_dataset("HuggingFaceH4/hh-rlhf")
 num_prompts = len(dataset)
 
 # Access the 'train' split
@@ -32,11 +27,6 @@ train_dataset = dataset['train']
 # Extract prompts from the 'train' split
 dataset_prompt = train_dataset['prompt']
 model.to(device)
-
-length_threshold = 600  # Example threshold
-
-# Remove outliers from the dataset
-filtered_dataset = remove_outliers(dataset, length_threshold)
 
 
 class RevisionModel(nn.Module):
