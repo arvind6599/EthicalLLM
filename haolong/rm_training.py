@@ -80,7 +80,7 @@ if __name__ == "__main__":
     "--gradient_accumulation_steps=16",
     "--gradient_checkpointing=True",
     "--learning_rate=1.41e-5",
-    "--report_to=wandb",
+    "--report_to=tensorboard",
     "--remove_unused_columns=False",
     "--optim=adamw_torch",
     "--logging_steps=10",
