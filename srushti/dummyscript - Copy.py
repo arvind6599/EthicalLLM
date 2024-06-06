@@ -85,7 +85,7 @@ def revision(principles_list):
     revised_data = []
 
     revision_model = RevisionModel(model, tokenizer, principles_list).to(device)
-    revision_model = nn.DataParallel(revision_model)
+    # revision_model = nn.DataParallel(revision_model)
 
     for i in tqdm(range(0, len(dataset_prompt), batch_size)):
         batch_transcripts = dataset_prompt[i:i + batch_size]
