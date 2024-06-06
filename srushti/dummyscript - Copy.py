@@ -7,6 +7,8 @@ from tqdm import tqdm
 import time
 import json
 import re
+from concurrent.futures import ThreadPoolExecutor
+
 
 pattern = r"Human:(.*?)\n\n"
 
