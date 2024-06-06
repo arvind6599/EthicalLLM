@@ -22,7 +22,7 @@ class JSONLDataset(Dataset):
                         self.data.append({"prompt": first_human_question})
                 except json.JSONDecodeError as e:
                     print(f"Error decoding JSON on line {line_number}: {e}")
-
+        print(f"Length of self.data: {len(self.data)}")
         if shuffle:
             random.shuffle(self.data)
 
