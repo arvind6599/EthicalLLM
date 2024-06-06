@@ -30,7 +30,7 @@ class JSONLDataset(Dataset):
             self.data = self.data[:num_samples]
 
     def extract_first_human_question(self, transcript):
-        human_statements = re.findall(r'Human: (.*?)(?=(\n\nAssistant:|\Z))', transcript, re.DOTALL)
+        human_statements = re.findall(r'\n\nHuman: (.*?)\n\nAssistant:', transcript, re.DOTALL)
         if human_statements:
             return human_statements[0][0].strip()
         return None
