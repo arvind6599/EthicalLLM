@@ -8,17 +8,15 @@ import time
 import json
 import random
 import re
-import ujson
+import demjson
 
 
 def load_data(file_path):
     data = []
     with open(file_path, 'r') as f:
         for line in tqdm(f):
-            line = re.sub(r'\\n', '', line)
-            line = re.sub(r'\\u2019', r'\\u0027', line)
             try:
-                example = ujson.loads(line)
+                example = demjson.loads(line)
                 data.append(example)
             except json.JSONDecodeError as e:
                 print(f"Error: {line.strip()}")
