@@ -10,6 +10,13 @@ import random
 import re
 
 
+def extract_first_human_question(transcript):
+    human_statements = re.findall(r'\n\nHuman: (.*?)\n\nAssistant:', transcript, re.DOTALL)
+    if human_statements:
+        return human_statements[0][0].strip()
+    return None
+
+
 class JSONLDataset(Dataset):
     def __init__(self, file_path, num_samples=None, shuffle=False):
         self.data = []
@@ -28,12 +35,6 @@ class JSONLDataset(Dataset):
 
         if num_samples:
             self.data = self.data[:num_samples]
-
-    def extract_first_human_question(self, transcript):
-        human_statements = re.findall(r'\n\nHuman: (.*?)\n\nAssistant:', transcript, re.DOTALL)
-        if human_statements:
-            return human_statements[0][0].strip()
-        return None
 
     def __len__(self):
         return len(self.data)
