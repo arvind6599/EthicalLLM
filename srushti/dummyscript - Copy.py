@@ -8,20 +8,20 @@ import time
 import json
 import re
 
+pattern = r"Human:(.*?)\n\n"
 
-def extract_human_prompts(dataset, batch_size):
-    dataset_prompt = []
-    pattern = r"Human:(.*?)\n\n"
 
-    for i in tqdm(range(0, len(dataset), batch_size)):
-        batch_transcripts = dataset[i:i + batch_size]
-        for transcript in batch_transcripts:
-            match = re.search(pattern, transcript, re.DOTALL)
-            if match:
-                first_human_prompt = match.group(1).strip()
-                dataset_prompt.append(first_human_prompt)
+def extract_human_prompts(transcript):
+    match = re.search(pattern, transcript, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    return None
 
-    return dataset_prompt
+
+def extract_human_prompts_parallel(batch_transcripts):
+    with ThreadPoolExecutor() as executor:
+        prompts = list(executor.map(extract_human_prompt, batch_transcripts))
+    return [prompt for prompt in prompts if prompt is not None]
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
@@ -31,7 +31,6 @@ model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2
 tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
 
 tokenizer.pad_token_id = tokenizer.eos_token_id
-
 
 batch_size = 32
 revised_data = []
@@ -44,10 +43,9 @@ train_dataset = dataset['train']
 # Extract prompts from the 'train' split
 dataset_prompt = train_dataset['transcript']
 dataset_prompt = dataset_prompt[:4000]
-dataset_prompt = extract_human_prompts(dataset_prompt, batch_size)
+# dataset_prompt = extract_human_prompts(dataset_prompt, batch_size)
 
 model.to(device)
-
 
 
 class RevisionModel(nn.Module):
@@ -70,7 +68,7 @@ class RevisionModel(nn.Module):
                     f" respect to...' and provide only the terminal output in the revised answer."
                     f" Remove the token count from the revised answer such as '(50 tokens)'."
                     f" Remove any '\n\n Revised response: \n\n' from the revised response."
-                    )
+                )
                 new_inputs = self.tokenizer.encode(critique, return_tensors='pt').to(self.model.device)
                 with torch.no_grad():
                     new_out = self.model.generate(new_inputs, max_new_tokens=50)
@@ -88,7 +86,9 @@ def revision(principles_list):
     revision_model = nn.DataParallel(revision_model)
 
     for i in tqdm(range(0, len(dataset_prompt), batch_size)):
-        batch_prompts = dataset_prompt[i:i + batch_size]
+        batch_transcripts = dataset_prompt[i:i + batch_size]
+        batch_prompts = extract_human_prompts_parallel(batch_transcripts)
+
         input_ids = tokenizer.batch_encode_plus(batch_prompts, return_tensors='pt', padding=True)
         input_ids = input_ids.input_ids.to(device)
         with torch.no_grad():
