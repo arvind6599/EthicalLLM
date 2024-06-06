@@ -61,7 +61,7 @@ def revision(principles_list):
             device)
         # batch_input_ids = torch.stack(batch_input_ids)
 
-        output = model.generate(batch_input_ids, max_new_tokens=50, num_beams=batch_size)
+        output = model.generate(batch_input_ids, max_new_tokens=50)
         output = output[:, batch_input_ids.shape[1]:]
         base_answers = tokenizer.batch_decode(output, skip_special_tokens=True)
         original_answers = base_answers.copy()
