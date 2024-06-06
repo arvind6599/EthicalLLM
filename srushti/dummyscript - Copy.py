@@ -113,7 +113,7 @@ def revision(principles_list):
 
         torch.cuda.empty_cache()
 
-    with open("revised_datafile_10k.jsonl", "w") as f:
+    with open("revised_datafile_redteam.jsonl", "w") as f:
         for data in revised_data:
             json_line = json.dumps(data)
             f.write(json_line + "\n")
