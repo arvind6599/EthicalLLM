@@ -22,7 +22,7 @@ def extract_human_prompts(transcript):
 
 def extract_human_prompts_parallel(batch_transcripts):
     with ThreadPoolExecutor() as executor:
-        prompts = list(executor.map(extract_human_prompt, batch_transcripts))
+        prompts = list(executor.map(extract_human_prompts, batch_transcripts))
     return [prompt for prompt in prompts if prompt is not None]
 
 
