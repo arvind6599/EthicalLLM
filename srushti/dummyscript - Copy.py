@@ -7,6 +7,22 @@ from tqdm import tqdm
 import time
 import json
 
+
+def extract_human_prompts(dataset, batch_size):
+    dataset_prompt = []
+    pattern = r"Human:(.*?)\n\n"
+
+    for i in tqdm(range(0, len(dataset), batch_size)):
+        batch_transcripts = dataset[i:i + batch_size]
+        for transcript in batch_transcripts:
+            match = re.search(pattern, transcript, re.DOTALL)
+            if match:
+                first_human_prompt = match.group(1).strip()
+                dataset_prompt.append(first_human_prompt)
+
+    return dataset_prompt
+
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 
 access_token = "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"
@@ -26,9 +42,11 @@ train_dataset = dataset['train']
 
 # Extract prompts from the 'train' split
 dataset_prompt = train_dataset['transcript']
-print(len(dataset_prompt))
-model.to(device)
 dataset_prompt = dataset_prompt[:4000]
+dataset_prompt = extract_human_prompts(dataset_prompt, batch_size)
+
+model.to(device)
+
 
 
 class RevisionModel(nn.Module):
