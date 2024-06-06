@@ -10,37 +10,13 @@ import random
 import re
 
 
-def extract_first_human_question(transcript):
-    human_statements = re.findall(r'\n\nHuman: (.*?)\n\nAssistant:', transcript, re.DOTALL)
-    if human_statements:
-        return human_statements[0][0].strip()
-    return None
-
-
-class JSONLDataset(Dataset):
-    def __init__(self, file_path, num_samples=None, shuffle=False):
-        self.data = []
-        with open(file_path, 'r') as f:
-            for line_number, line in enumerate(f, 1):
-                try:
-                    transcript = json.loads(line.strip())['transcript']
-                    first_human_question = self.extract_first_human_question(transcript)
-                    if first_human_question:
-                        self.data.append({"prompt": first_human_question})
-                except json.JSONDecodeError as e:
-                    print(f"Error decoding JSON on line {line_number}: {e}")
-        print(f"Length of self.data: {len(self.data)}")
-        if shuffle:
-            random.shuffle(self.data)
-
-        if num_samples:
-            self.data = self.data[:num_samples]
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        return self.data[idx]
+def load_data(file_path):
+    data = []
+    with open(file_path, 'r') as f:
+        for line in tqdm(f):
+            example = json.loads(line)
+            data.append(example)
+    return data
 
 
 batch_size = 32
@@ -49,7 +25,8 @@ shuffle = True
 
 file_path = "dataset/red_team_attempts.jsonl"
 sampleNumber = 32
-ds = load_dataset('jsonl', data_files='dataset/red_team_attempts.jsonl')
+ds = load_data(file_path)
+prompts = [example['transcript'].split('\n\nHuman:')[1].split('\n\n')[0] for example in ds]
 # dataset = JSONLDataset(file_path, num_samples=sampleNumber, shuffle=shuffle)
 # data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
@@ -112,8 +89,8 @@ def revision(principles_list):
     revision_model = RevisionModel(model, tokenizer, principles_list).to(device)
     revision_model = nn.DataParallel(revision_model)
 
-    for i in tqdm(data_loader):
-        batch_prompts = list(i)
+    for i in tqdm(range(0, len(prompts), batch_size)):
+        batch_prompts = prompts[i:i+batch_size]
         input_ids = tokenizer.batch_encode_plus(batch_prompts, return_tensors='pt', padding=True)
         input_ids = input_ids.input_ids.to(device)
         with torch.no_grad():
@@ -121,9 +98,6 @@ def revision(principles_list):
         output = output[:, input_ids.shape[1]:]
 
         base_answers = [tokenizer.decode(out, skip_special_tokens=True) for out in output]
-
-        # revision_model = RevisionModel(model, tokenizer, principles_list).to(device)
-        # revision_model = nn.DataParallel(revision_model)
 
         revised_answers = revision_model(batch_prompts, base_answers)
 
