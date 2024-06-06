@@ -49,11 +49,9 @@ shuffle = True
 
 file_path = "dataset/red_team_attempts.jsonl"
 sampleNumber = 32
-dataset = JSONLDataset(file_path, num_samples=sampleNumber, shuffle=shuffle)
-print(len(dataset))
-print(dataset[0])
-print(dataset[1])
-data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+ds = load_dataset('jsonl', data_files='dataset/red_team_attempts.jsonl')
+# dataset = JSONLDataset(file_path, num_samples=sampleNumber, shuffle=shuffle)
+# data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 
