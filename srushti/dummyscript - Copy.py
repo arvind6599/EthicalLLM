@@ -9,7 +9,6 @@ import json
 import re
 from concurrent.futures import ThreadPoolExecutor
 
-
 pattern = r"Human:(.*?)\n\n"
 
 
@@ -82,10 +81,9 @@ class RevisionModel(nn.Module):
 
 
 def revision(principles_list):
-    revised_data = []
-
     revision_model = RevisionModel(model, tokenizer, principles_list).to(device)
     # revision_model = nn.DataParallel(revision_model)
+    output_file = open("revised_datafile_redteam.jsonl", "a", encoding="utf-8")
 
     for i in tqdm(range(0, len(dataset_prompt), batch_size)):
         batch_transcripts = dataset_prompt[i:i + batch_size]
@@ -104,19 +102,19 @@ def revision(principles_list):
 
         revised_answers = revision_model(batch_prompts, base_answers)
 
-        for j, prompt in enumerate(batch_prompts):
-            revised_data.append({
-                "prompt": prompt,
-                "base_answer": base_answers[j],
-                "revised_answer": revised_answers[j]
-            })
+        if i % 100 == 0:
+            for j, prompt in enumerate(batch_prompts):
+                data = {
+                    "prompt": prompt,
+                    "base_answer": base_answers[j],
+                    "revised_answer": revised_answers[j]
+                }
+                json_line = json.dumps(data)
+                output_file.write(json_line + "\n")
 
         torch.cuda.empty_cache()
 
-    with open("revised_datafile_redteam.jsonl", "w") as f:
-        for data in revised_data:
-            json_line = json.dumps(data)
-            f.write(json_line + "\n")
+    output_file.close()
 
 
 principles_list = ["honesty", "prudence", "compassion", "justice", "humility", "respect"]
