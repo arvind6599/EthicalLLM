@@ -8,6 +8,7 @@ import time
 import json
 import random
 import re
+import ujson
 
 
 def load_data(file_path):
@@ -17,7 +18,7 @@ def load_data(file_path):
             line = re.sub(r'\\n', '', line)
             line = re.sub(r'\\u2019', r'\\u0027', line)
             try:
-                example = json.loads(line)
+                example = ujson.loads(line)
                 data.append(example)
             except json.JSONDecodeError as e:
                 print(f"Error: {line.strip()}")
