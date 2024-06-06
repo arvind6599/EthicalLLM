@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 import time
 import json
+import re
 
 
 def extract_human_prompts(dataset, batch_size):
