@@ -14,8 +14,14 @@ def load_data(file_path):
     data = []
     with open(file_path, 'r') as f:
         for line in tqdm(f):
-            example = json.loads(line)
-            data.append(example)
+            line = re.sub(r'[\r\n]+', '', line)
+            try:
+
+                example = json.loads(line)
+                data.append(example)
+            except json.JSONDecodeError as e:
+                print(f"Error: {line.strip()}")
+                raise e
     return data
 
 
