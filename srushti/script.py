@@ -26,7 +26,7 @@ dataset = load_dataset("srushtisingh/Ethical")  # Replace "your_data.jsonl" with
 
 def tokenize_function(examples):
     return tokenizer(examples["prompt"], text_target=examples["revised_answer"], truncation=True, padding="max_length",
-                     max_length=512)
+                     max_length=60)
 
 
 # Tokenize dataset
@@ -69,4 +69,4 @@ for epoch in progress_bar:
 
 print(results)
 
-trainer.model.push_to_hub("srsuhtisingh/EthicalSFT")
+trainer.model.push_to_hub("srushtisingh/EthicalSFT")
