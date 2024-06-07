@@ -41,11 +41,11 @@ training_args = TrainingArguments(
     output_dir="./fine-tuned-model",
     evaluation_strategy="steps",
     learning_rate=2e-5,
-    #per_device_train_batch_size=2,
-    #per_device_eval_batch_size=2,
+    per_device_train_batch_size=1,
+    per_device_eval_batch_size=1,
     num_train_epochs=2,
     weight_decay=0.01,
-   # gradient_accumulation_steps=2,
+    gradient_accumulation_steps=32,
     fp16=True,
     gradient_checkpointing=True,
     load_best_model_at_end=True,
@@ -60,13 +60,8 @@ trainer = Trainer(
     tokenizer=tokenizer
 )
 
-# Train and Evaluate
-progress_bar = tqdm(range(training_args.num_train_epochs))
-for epoch in progress_bar:
-    trainer.train()
-    results = trainer.evaluate()
-    progress_bar.set_postfix(eval_loss=results["eval_loss"])
-
+trainer.train()
+results = trainer.evaluate()
 print(results)
 
 trainer.model.push_to_hub("srushtisingh/EthicalSFT")
