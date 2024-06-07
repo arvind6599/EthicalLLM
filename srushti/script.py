@@ -25,7 +25,8 @@ dataset = load_dataset("srushtisingh/Ethical")  # Replace "your_data.jsonl" with
 
 
 def tokenize_function(examples):
-    return tokenizer(examples["prompt"], text_target=examples["revised_answer"], truncation=True)
+    return tokenizer(examples["prompt"], text_target=examples["revised_answer"], truncation=True, padding="max_length",
+                     max_length=512)
 
 
 # Tokenize dataset
@@ -44,6 +45,10 @@ training_args = TrainingArguments(
     per_device_eval_batch_size=8,
     num_train_epochs=2,
     weight_decay=0.01,
+    gradient_accumulation_steps=16,
+    fp16=True,
+    gradient_checkpointing=True,
+    load_best_model_at_end=True,
 )
 
 # Initialize Trainer
