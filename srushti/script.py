@@ -1,5 +1,5 @@
 import torch
-from transformers import TextDataset, AutoConfig, DataCollatorForLanguageModeling
+from transformers import TextDataset, AutoConfig, DataCollatorForLanguageModeling, AutoModelForSequenceClassification
 from transformers import Trainer, TrainingArguments, AutoModelForCausalLM, AutoTokenizer, AutoModelForCausalLM, \
     BitsAndBytesConfig
 import torch
