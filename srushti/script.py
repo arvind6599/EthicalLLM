@@ -20,7 +20,7 @@ tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", 
 model.to(device)
 
 n = 24  # Number of layers to freeze
-for param in model.transformer.h[:n].parameters():
+for param in model.model.encoder.layers[:n].parameters():
     param.requires_grad = False
 
 tokenizer.pad_token = tokenizer.eos_token
