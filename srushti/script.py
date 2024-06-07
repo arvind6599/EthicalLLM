@@ -45,7 +45,7 @@ model_for_classification = AutoModelForSequenceClassification.from_pretrained(
     quantization_config=quantization_config,
     device_map=device_map
 )
-model_for_classification = get_peft_model(model_for_classification, config)
+model_for_classification = get_peft_model(model_for_classification, lora_config)
 
 
 # model_for_classification = AutoModelForSequenceClassification.from_pretrained(model_name, config=lora_config,
