@@ -28,7 +28,8 @@ def tokenize_function(examples):
 
 
 # Tokenize dataset
-tokenized_dataset = dataset["train"].map(tokenize_function, batched=True, remove_columns=["prompt", "revised_answer"])
+tokenized_dataset = dataset["train"].map(tokenize_function, batched=True, remove_columns=["prompt", "revised_answer"],
+                                         desc="Tokenizing dataset")
 
 # Split dataset into train and eval
 train_dataset, eval_dataset = tokenized_dataset.train_test_split(test_size=0.1, seed=42).values()
@@ -54,6 +55,10 @@ trainer = Trainer(
 )
 
 # Train and Evaluate
-trainer.train()
-results = trainer.evaluate()
+progress_bar = tqdm(range(training_args.num_train_epochs))
+for epoch in progress_bar:
+    trainer.train()
+    results = trainer.evaluate()
+    progress_bar.set_postfix(eval_loss=results["eval_loss"])
+
 print(results)
