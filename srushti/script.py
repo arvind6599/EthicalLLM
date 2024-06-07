@@ -86,7 +86,6 @@ tokenized_dataset = dataset["train"].map(tokenize_function, batched=True, remove
 # tokenized_dataset = dataset["train"].map(tokenize_function, batched=True, remove_columns=["prompt", "revised_answer"])
 
 # Split dataset into train and eval
-train_dataset, eval_dataset = tokenized_dataset["train"].train_test_split(test_size=0.1, seed=42).values()
 
 print(len(tokenized_dataset["train"][0]))  # This should match the expected batch size
 # Get the first batch of the tokenized dataset
@@ -114,7 +113,7 @@ training_args = TrainingArguments(
 trainer = Trainer(
     model=model_for_classification,
     args=training_args,
-    train_dataset=train_dataset,
+    train_dataset=tokenized_dataset,
     tokenizer=tokenizer,
 )
 
