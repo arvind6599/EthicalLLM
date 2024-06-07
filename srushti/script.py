@@ -48,14 +48,14 @@ model_for_classification = AutoModelForSequenceClassification.from_pretrained(
 )
 model_for_classification = get_peft_model(model_for_classification, lora_config)
 
-
 # model_for_classification = AutoModelForSequenceClassification.from_pretrained(model_name, config=lora_config,
 # quantization_config=quantization_config)
-#tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", model_max_length=100,
-   #                                       padding="max_length", truncation=True)
+# tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", model_max_length=100,
+#                                       padding="max_length", truncation=True)
 
 try:
-    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_auth_token=access_token, padding="max_length", truncation=True)
+    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_auth_token=access_token,
+                                              padding="max_length", truncation=True)
     print("Tokenizer loaded successfully")
 except Exception as e:
     print(f"Error loading tokenizer: {e}")
@@ -64,7 +64,6 @@ if tokenizer.pad_token is None:
     tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
     model_for_classification.resize_token_embeddings(len(tokenizer))
 model_for_classification.config.pad_token_id = model_for_classification.config.eos_token_id
-
 
 # model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_cache=False,
 # token=access_token) tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2",
@@ -75,12 +74,13 @@ model_for_classification.config.pad_token_id = model_for_classification.config.e
 
 dataset = load_dataset("srushtisingh/Ethical")  # Replace "your_data.jsonl" with your file path
 
-# Tokenize Dataset
-tokenized_dataset = dataset.map(
-    lambda examples: tokenizer(examples["prompt"], text_target=examples["revised_answer"], truncation=True, padding="max_length", max_length=60),
-    batched=True,
-    remove_columns=["prompt", "revised_answer"]
-)
+
+def tokenize_function(examples):
+    return tokenizer(examples["prompt"], text_target=examples["revised_answer"], truncation=True, padding="max_length",
+                     max_length=60)
+
+
+tokenized_dataset = dataset["train"].map(tokenize_function, batched=True, remove_columns=["prompt", "revised_answer"])
 
 # Tokenize dataset
 # tokenized_dataset = dataset["train"].map(tokenize_function, batched=True, remove_columns=["prompt", "revised_answer"])
@@ -100,7 +100,6 @@ training_args = TrainingArguments(
     evaluation_strategy="steps",
     learning_rate=1.41e-5,
     per_device_train_batch_size=16,
-    per_device_eval_batch_size=16,
     num_train_epochs=2,
     weight_decay=0.01,
     gradient_accumulation_steps=16,
@@ -116,12 +115,8 @@ trainer = Trainer(
     model=model_for_classification,
     args=training_args,
     train_dataset=train_dataset,
-    eval_dataset=eval_dataset,
     tokenizer=tokenizer,
 )
 
 trainer.train()
-results = trainer.evaluate()
-print(results)
-
 trainer.model.push_to_hub("srushtisingh/EthicalSFT")
