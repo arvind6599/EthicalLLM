@@ -6,7 +6,7 @@ from transformers import Trainer, TrainingArguments, AutoModelForCausalLM, AutoT
 import torch
 from datasets import load_dataset
 from datasets import Dataset
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 import time
 import json
 import random
