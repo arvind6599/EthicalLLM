@@ -45,7 +45,7 @@ train_dataset = dataset['train']
 
 # Extract prompts from the 'train' split
 dataset_prompt = train_dataset['transcript']
-dataset_prompt = dataset_prompt[:40]
+dataset_prompt = dataset_prompt[:4000]
 # dataset_prompt = extract_human_prompts(dataset_prompt, batch_size)
 
 model.to(device)
