@@ -11,6 +11,7 @@ import time
 import json
 import random
 from sklearn.model_selection import train_test_split
+import os
 
 access_token = "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"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
@@ -73,6 +74,7 @@ trainer = Trainer(
     tokenizer=tokenizer
 )
 
+start = time.time()
 # Train and Evaluate
 progress_bar = tqdm(range(training_args.num_train_epochs))
 for epoch in progress_bar:
@@ -80,6 +82,8 @@ for epoch in progress_bar:
     results = trainer.evaluate()
     progress_bar.set_postfix(eval_loss=results["eval_loss"])
 
+
+print("Time taken for rm training:", time.time() - start)
 print(results)
 
 trainer.model.push_to_hub("srushtisingh/EthicalSFT")
