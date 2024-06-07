@@ -51,8 +51,15 @@ model_for_classification = get_peft_model(model_for_classification, lora_config)
 
 # model_for_classification = AutoModelForSequenceClassification.from_pretrained(model_name, config=lora_config,
 # quantization_config=quantization_config)
-tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", model_max_length=100,
-                                          padding="max_length", truncation=True)
+#tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", model_max_length=100,
+   #                                       padding="max_length", truncation=True)
+
+try:
+    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_auth_token=access_token)
+    print("Tokenizer loaded successfully")
+except Exception as e:
+    print(f"Error loading tokenizer: {e}")
+    
 if tokenizer.pad_token is None:
     tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
     model_for_classification.resize_token_embeddings(len(tokenizer))
