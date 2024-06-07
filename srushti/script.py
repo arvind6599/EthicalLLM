@@ -1,5 +1,4 @@
 import torch
-from transformers import AutoModelForCausalLM, BitsAndBytesConfig, TrainingArguments, Trainer
 from transformers import BitsAndBytesConfig, HfArgumentParser, AutoConfig, AutoModelForSequenceClassification
 from transformers import Trainer, TrainingArguments, AutoModelForCausalLM, AutoTokenizer, AdapterType, AdapterConfig
 from datasets import load_dataset
