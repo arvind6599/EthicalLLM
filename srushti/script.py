@@ -59,7 +59,7 @@ try:
     print("Tokenizer loaded successfully")
 except Exception as e:
     print(f"Error loading tokenizer: {e}")
-    
+
 if tokenizer.pad_token is None:
     tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
     model_for_classification.resize_token_embeddings(len(tokenizer))
@@ -87,7 +87,7 @@ tokenized_dataset = dataset.map(
 
 # Split dataset into train and eval
 train_dataset, eval_dataset = tokenized_dataset["train"].train_test_split(test_size=0.1, seed=42).values()
-
+print(len(tokenized_dataset["train"][0]))  # This should match the expected batch size
 # Training Arguments
 training_args = TrainingArguments(
     output_dir="./fine-tuned-model",
