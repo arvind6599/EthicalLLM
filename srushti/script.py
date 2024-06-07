@@ -66,7 +66,7 @@ training_args = TrainingArguments(
 
 # Initialize Trainer
 trainer = Trainer(
-    model=model,
+    model=model_for_classification,
     args=training_args,
     train_dataset=train_dataset,
     eval_dataset=eval_dataset,
