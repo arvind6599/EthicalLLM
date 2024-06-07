@@ -1,9 +1,7 @@
 import torch
-# from transformers import GPT2LMHeadModel, GPT2Tokenizer, Trainer, TrainingArguments, DataCollatorForLanguageModeling
-# from transformers import AutoModelForCausalLM, , BitsAndBytesConfig, TrainingArguments, Trainer
-from transformers import GPT2LMHeadModel, GPT2Tokenizer, TextDataset, DataCollatorForLanguageModeling
+from transformers import AutoModelForCausalLM, BitsAndBytesConfig, TrainingArguments, Trainer
+from transformers import BitsAndBytesConfig, HfArgumentParser, AutoConfig, AutoModelForSequenceClassification
 from transformers import Trainer, TrainingArguments, AutoModelForCausalLM, AutoTokenizer
-import torch
 from datasets import load_dataset
 from datasets import Dataset
 from tqdm import tqdm
@@ -11,17 +9,57 @@ import time
 import json
 import random
 from sklearn.model_selection import train_test_split
+from peft import (
+    LoraConfig,
+    TaskType,
+)
+import os
+import time
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
+device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
+
+# new code:
+quantization_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.float16,
+)
+# config = AutoConfig.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", num_labels=2)
+
+# lora config
+LORA_R = 8
+LORA_ALPHA = 32
+LORA_DROPOUT = 0.1
+lora_config = LoraConfig(
+    task_type=TaskType.SEQ_CLS,
+    inference_mode=False,
+    r=LORA_R,
+    lora_alpha=LORA_ALPHA,
+    lora_dropout=LORA_DROPOUT,
+    bias='none'
+)
+
+model_for_classification = AutoModelForSequenceClassification.from_pretrained(
+    "mistralai/Mistral-7B-Instruct-v0.2",
+    config=lora_config,
+    quantization_config=quantization_config,
+    device_map=device_map
+)
+# model_for_classification = AutoModelForSequenceClassification.from_pretrained(model_name, config=lora_config,
+# quantization_config=quantization_config)
+tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", model_max_length=100,
+                                          padding="max_length", truncation=True)
+if tokenizer.pad_token is None:
+    tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
+    model_for_classification.resize_token_embeddings(len(tokenizer))
+model_for_classification.config.pad_token_id = model_for_classification.config.eos_token_id
 
 access_token = "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"
-model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_cache=False, token=access_token)
-tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
-model.to(device)
+# model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_cache=False, token=access_token)
+# tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
+# model.to(device)
 
-n = 24  # Number of layers to freeze
-for param in model.model.encoder.layers[:n].parameters():
-    param.requires_grad = False
 
 tokenizer.pad_token = tokenizer.eos_token
 
@@ -43,24 +81,27 @@ train_dataset, eval_dataset = tokenized_dataset.train_test_split(test_size=0.1, 
 training_args = TrainingArguments(
     output_dir="./fine-tuned-model",
     evaluation_strategy="steps",
-    learning_rate=2e-5,
-    per_device_train_batch_size=1,
-    per_device_eval_batch_size=1,
+    learning_rate=1.41e-5,
+    per_device_train_batch_size=20,
+    per_device_eval_batch_size=20,
     num_train_epochs=2,
     weight_decay=0.01,
-    gradient_accumulation_steps=32,
+    gradient_accumulation_steps=16,
     fp16=True,
+    logging_steps=10,
+    max_length=100,
+    save_total_limit=1,
     gradient_checkpointing=True,
     load_best_model_at_end=True,
 )
 
 # Initialize Trainer
 trainer = Trainer(
-    model=model,
+    model=model_for_classification,
     args=training_args,
     train_dataset=train_dataset,
     eval_dataset=eval_dataset,
-    tokenizer=tokenizer
+    tokenizer=tokenizer,
 )
 
 trainer.train()
