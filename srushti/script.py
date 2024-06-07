@@ -87,11 +87,11 @@ tokenized_dataset = dataset["train"].map(tokenize_function, batched=True, remove
 
 # Split dataset into train and eval
 
-print(len(tokenized_dataset["train"][0]))  # This should match the expected batch size
+#print(len(tokenized_dataset["train"][0]))  # This should match the expected batch size
 # Get the first batch of the tokenized dataset
-first_batch = tokenized_dataset["train"][0]
-print(first_batch["input_ids"].shape)  # This will give you the (batch_size, sequence_length)
-print(first_batch["labels"].shape)  # This will give you the (batch_size,)
+#first_batch = tokenized_dataset["train"][0]
+#print(first_batch["input_ids"].shape)  # This will give you the (batch_size, sequence_length)
+#print(first_batch["labels"].shape)  # This will give you the (batch_size,)
 
 # Training Arguments
 training_args = TrainingArguments(
