@@ -173,4 +173,4 @@ def convert_and_upload_to_hf_hub(filepath, repo_name, batch_size=1000):
 
 principles_list = ["honesty", "prudence", "compassion", "justice", "humility", "respect"]
 revision(principles_list)
-convert_and_upload_to_hf_hub("revised_datafile_redteam.jsonl", "srushtisingh/Ethical")
+convert_and_upload_to_hf_hub("revised_datafile_redteam.jsonl", "srushtisingh/Ethical_redteam")
