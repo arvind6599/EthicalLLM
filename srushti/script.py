@@ -55,7 +55,7 @@ model_for_classification = get_peft_model(model_for_classification, lora_config)
    #                                       padding="max_length", truncation=True)
 
 try:
-    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_auth_token=access_token)
+    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_auth_token=access_token, padding="max_length", truncation=True)
     print("Tokenizer loaded successfully")
 except Exception as e:
     print(f"Error loading tokenizer: {e}")
@@ -93,8 +93,8 @@ training_args = TrainingArguments(
     output_dir="./fine-tuned-model",
     evaluation_strategy="steps",
     learning_rate=1.41e-5,
-    per_device_train_batch_size=20,
-    per_device_eval_batch_size=20,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=16,
     num_train_epochs=2,
     weight_decay=0.01,
     gradient_accumulation_steps=16,
