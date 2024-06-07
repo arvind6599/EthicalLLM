@@ -73,7 +73,7 @@ tokenized_dataset = dataset.map(
 )
 
 # Tokenize dataset
-tokenized_dataset = dataset["train"].map(tokenize_function, batched=True, remove_columns=["prompt", "revised_answer"])
+# tokenized_dataset = dataset["train"].map(tokenize_function, batched=True, remove_columns=["prompt", "revised_answer"])
 
 # Split dataset into train and eval
 train_dataset, eval_dataset = tokenized_dataset.train_test_split(test_size=0.1, seed=42).values()
