@@ -90,7 +90,6 @@ training_args = TrainingArguments(
     gradient_accumulation_steps=16,
     fp16=True,
     logging_steps=10,
-    max_length=100,
     save_total_limit=1,
     gradient_checkpointing=True,
     load_best_model_at_end=True,
