@@ -18,6 +18,7 @@ from peft import get_peft_model
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
+access_token = "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"
 
 # new code:
 quantization_config = BitsAndBytesConfig(
@@ -43,7 +44,7 @@ lora_config = LoraConfig(
 model_for_classification = AutoModelForSequenceClassification.from_pretrained(
     "mistralai/Mistral-7B-Instruct-v0.2",
     quantization_config=quantization_config,
-    device_map=device_map
+    device_map=device_map, token=access_token
 )
 model_for_classification = get_peft_model(model_for_classification, lora_config)
 
@@ -57,7 +58,7 @@ if tokenizer.pad_token is None:
     model_for_classification.resize_token_embeddings(len(tokenizer))
 model_for_classification.config.pad_token_id = model_for_classification.config.eos_token_id
 
-access_token = "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"
+
 # model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_cache=False,
 # token=access_token) tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2",
 # token=access_token) model.to(device)
