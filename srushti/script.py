@@ -46,6 +46,10 @@ model_for_classification = AutoModelForSequenceClassification.from_pretrained(
     quantization_config=quantization_config,
     device_map=device_map
 )
+
+adapter_config = AdapterConfig.load_adapter("text_task", config="houlsby", load_as="text_task", with_head=False)
+model.add_adapter("text_task", AdapterType.text_task, config=adapter_config)
+
 # model_for_classification = AutoModelForSequenceClassification.from_pretrained(model_name, config=lora_config,
 # quantization_config=quantization_config)
 tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", model_max_length=100,
