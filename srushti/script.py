@@ -1,6 +1,7 @@
 import torch
 from transformers import BitsAndBytesConfig, HfArgumentParser, AutoConfig, AutoModelForSequenceClassification
-from transformers import Trainer, TrainingArguments, AutoModelForCausalLM, AutoTokenizer, AdapterType, AdapterConfig
+from transformers import Trainer, TrainingArguments, AutoModelForCausalLM, AutoTokenizer
+from transformers.adapters import AdapterType, AdapterConfig
 from datasets import load_dataset
 from datasets import Dataset
 from tqdm import tqdm
