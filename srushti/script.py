@@ -41,8 +41,8 @@ training_args = TrainingArguments(
     output_dir="./fine-tuned-model",
     evaluation_strategy="steps",
     learning_rate=2e-5,
-    per_device_train_batch_size=32,
-    per_device_eval_batch_size=32,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=16,
     num_train_epochs=2,
     weight_decay=0.01,
 )
@@ -64,3 +64,5 @@ for epoch in progress_bar:
     progress_bar.set_postfix(eval_loss=results["eval_loss"])
 
 print(results)
+
+trainer.model.push_to_hub("srsuhtisingh/EthicalSFT")
