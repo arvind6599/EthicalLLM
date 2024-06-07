@@ -56,20 +56,21 @@ if tokenizer.pad_token is None:
 model_for_classification.config.pad_token_id = model_for_classification.config.eos_token_id
 
 access_token = "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"
-# model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_cache=False, token=access_token)
-# tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
-# model.to(device)
+# model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_cache=False,
+# token=access_token) tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2",
+# token=access_token) model.to(device)
 
 
-tokenizer.pad_token = tokenizer.eos_token
+# tokenizer.pad_token = tokenizer.eos_token
 
 dataset = load_dataset("srushtisingh/Ethical")  # Replace "your_data.jsonl" with your file path
 
-
-def tokenize_function(examples):
-    return tokenizer(examples["prompt"], text_target=examples["revised_answer"], truncation=True, padding="max_length",
-                     max_length=60)
-
+# Tokenize Dataset
+tokenized_dataset = dataset.map(
+    lambda examples: tokenizer(examples["prompt"], text_target=examples["revised_answer"], truncation=True, padding="max_length", max_length=60),
+    batched=True,
+    remove_columns=["prompt", "revised_answer"]
+)
 
 # Tokenize dataset
 tokenized_dataset = dataset["train"].map(tokenize_function, batched=True, remove_columns=["prompt", "revised_answer"])
