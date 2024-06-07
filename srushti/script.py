@@ -1,7 +1,6 @@
 import torch
 from transformers import BitsAndBytesConfig, HfArgumentParser, AutoConfig, AutoModelForSequenceClassification
 from transformers import Trainer, TrainingArguments, AutoModelForCausalLM, AutoTokenizer
-from transformers.adapters import AdapterType, AdapterConfig
 from datasets import load_dataset
 from datasets import Dataset
 from tqdm import tqdm
@@ -15,6 +14,7 @@ from peft import (
 )
 import os
 import time
+from peft import get_peft_model
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
@@ -42,13 +42,11 @@ lora_config = LoraConfig(
 
 model_for_classification = AutoModelForSequenceClassification.from_pretrained(
     "mistralai/Mistral-7B-Instruct-v0.2",
-    config=lora_config,
     quantization_config=quantization_config,
     device_map=device_map
 )
+model_for_classification = get_peft_model(model_for_classification, config)
 
-adapter_config = AdapterConfig.load_adapter("text_task", config="houlsby", load_as="text_task", with_head=False)
-model.add_adapter("text_task", AdapterType.text_task, config=adapter_config)
 
 # model_for_classification = AutoModelForSequenceClassification.from_pretrained(model_name, config=lora_config,
 # quantization_config=quantization_config)
