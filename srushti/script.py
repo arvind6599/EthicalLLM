@@ -67,8 +67,8 @@ except Exception as e:
 tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", model_max_length=100, padding="max_length", truncation=True)
 if tokenizer.pad_token is None:
     tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
-    model_for_classification.resize_token_embeddings(len(tokenizer))
-model_for_classification.config.pad_token_id = model_for_classification.config.eos_token_id
+    actual_model.resize_token_embeddings(len(tokenizer))
+actual_model.config.pad_token_id = actual_model.config.eos_token_id
 
 # model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_cache=False,
 # token=access_token) tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2",
