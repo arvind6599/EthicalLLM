@@ -166,6 +166,7 @@ trainer = SFTTrainer(
     args=training_args,
     train_dataset=training_dataset,
     tokenizer=tokenizer,
+    formatting_func=preprocess_function,
 )
 start = time.time()
 print("Training...")
