@@ -138,11 +138,11 @@ cmd_args = [
 # parser = HfArgumentParser((SFTConfig, ModelConfig))
 # sft_config, model_config = parser.parse_args_into_dataclasses(args=cmd_args)
 # sft_config.gradient_checkpointing_kwargs = dict(use_reentrant=False)
-
+'''
 model_kwargs = dict(
     trust_remote_code=model_config.trust_remote_code,
     device_map=get_kbit_device_map() if quantization_config is not None else None,
-)
+)'''
 
 # Training Arguments
 training_args = TrainingArguments(
