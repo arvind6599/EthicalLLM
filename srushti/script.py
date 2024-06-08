@@ -19,7 +19,7 @@ from trl import ModelConfig, SFTTrainer
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
-access_token = "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"
+access_token = "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"
 
 # new code:
 quantization_config = BitsAndBytesConfig(
