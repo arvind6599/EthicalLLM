@@ -109,8 +109,30 @@ def preprocess_function(examples, tokenizer=tokenizer):
     return new_examples
 
 
+def preprocess_function1(examples):
+    inputs = examples["prompt"]
+    targets = examples["revised_answer"]
+
+    # Ensure the inputs and targets are lists of strings
+    if isinstance(inputs, str):
+        inputs = [inputs]
+    if isinstance(targets, str):
+        targets = [targets]
+
+    # Tokenize the prompts
+    tokenized_inputs = tokenizer(inputs, truncation=True, padding="max_length", max_length=100)
+    tokenized_targets = tokenizer(targets, truncation=True, padding="max_length", max_length=100)
+
+    return {
+        "input_ids_prompt": tokenized_inputs["input_ids"],
+        "attention_mask_prompt": tokenized_inputs["attention_mask"],
+        "input_ids_revised": tokenized_targets["input_ids"],
+        "attention_mask_revised": tokenized_targets["attention_mask"]
+    }
+
+
 training_dataset = dataset_train.map(
-    preprocess_function,
+    preprocess_function1,
     batched=True,
     num_proc=4
 )
@@ -166,7 +188,8 @@ trainer = SFTTrainer(
     args=training_args,
     train_dataset=training_dataset,
     tokenizer=tokenizer,
-    formatting_func=preprocess_function,
+    formatting_func=preprocess_function1,
+    max_length=50
 )
 start = time.time()
 print("Training...")
