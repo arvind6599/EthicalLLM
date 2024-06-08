@@ -55,6 +55,11 @@ actual_model = AutoModelForSequenceClassification.from_pretrained(
 
 tokenizer = transformers.AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token,
                                                        padding="max_length", truncation=True)
+if tokenizer.pad_token is None:
+    tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
+    actual_model.resize_token_embeddings(len(tokenizer))
+actual_model.config.pad_token_id = actual_model.config.eos_token_id
+
 # model_for_classification = AutoModelForSequenceClassification.from_pretrained(model_name, config=lora_config,
 # quantization_config=quantization_config)
 # tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", model_max_length=100,
