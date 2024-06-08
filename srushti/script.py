@@ -108,6 +108,8 @@ def tokenize_function(examples):
 # Apply tokenization to the datasets
 train_data = train_data.map(tokenize_function, batched=True)
 val_data = val_data.map(tokenize_function, batched=True)
+print(len(train_data))
+print(len(val_data))
 
 '''
 def preprocess_function(examples, tokenizer=tokenizer):
@@ -173,6 +175,8 @@ training_args = TrainingArguments(
     output_dir="./fine-tuned-model",
     evaluation_strategy="steps",
     learning_rate=1.41e-5,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=16,
     num_train_epochs=2,
     weight_decay=0.01,
     gradient_accumulation_steps=16,
