@@ -188,7 +188,7 @@ training_args = TrainingArguments(
 trainer = Trainer(
     model=model_for_classification,
     args=training_args,
-    train_dataset=training_dataset,
+    train_dataset=train_data,
     tokenizer=tokenizer,
     eval_dataset=val_data
 )
