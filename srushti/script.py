@@ -138,7 +138,7 @@ training_dataset = train_data.map(
     num_proc=4
 )
 
-training_dataset = eval_data.map(
+training_dataset = val_data.map(
     preprocess_function,
     batched=True,
     num_proc=4
