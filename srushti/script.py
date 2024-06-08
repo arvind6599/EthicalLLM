@@ -51,9 +51,10 @@ model_for_classification = AutoModelForSequenceClassification.from_pretrained(
 model_for_classification = get_peft_model(model_for_classification, lora_config)
 
 actual_model = AutoModelForSequenceClassification.from_pretrained(
-    "mistralai/Mistral-7B-Instruct-v0.2", token=access_token, padding="max_length", truncation=True)
+    "mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
 
-tokenizer = transformers.AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
+tokenizer = transformers.AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token,
+                                                       padding="max_length", truncation=True)
 # model_for_classification = AutoModelForSequenceClassification.from_pretrained(model_name, config=lora_config,
 # quantization_config=quantization_config)
 # tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", model_max_length=100,
