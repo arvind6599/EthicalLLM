@@ -167,7 +167,6 @@ trainer = Trainer(
     args=training_args,
     train_dataset=training_dataset,
     tokenizer=tokenizer,
-    max_seq_length=50,
     data_collator=data_collator
 )
 
