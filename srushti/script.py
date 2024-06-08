@@ -66,9 +66,9 @@ except Exception as e:
 tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", model_max_length=100,
                                           padding="max_length", truncation=True, token=access_token)
 if tokenizer.pad_token is None:
-    tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
+    tokenizer.add_special_tokens({'pad_token': '[PAD]'})
     model_for_classification.resize_token_embeddings(len(tokenizer))
-model_for_classification.config.pad_token_id = model_for_classification.config.eos_token_id
+
 
 # model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_cache=False,
 # token=access_token) tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2",
@@ -132,18 +132,18 @@ def preprocess_function(examples, tokenizer=tokenizer):
     return new_examples
 
 
-training_dataset = train_data.map(
+train_data = train_data.map(
     preprocess_function,
     batched=True,
     num_proc=4
 )
 
-training_dataset = val_data.map(
+val_data = val_data.map(
     preprocess_function,
     batched=True,
     num_proc=4
 )
-
+print(train_data[0])
 #print(len(training_dataset))
 #print(training_dataset[38])
 # Tokenize dataset
