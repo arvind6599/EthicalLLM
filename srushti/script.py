@@ -163,7 +163,7 @@ training_args = TrainingArguments(
 
 # Initialize Trainer
 trainer = Trainer(
-    model=actual_model,
+    model=model_for_classification,
     args=training_args,
     train_dataset=training_dataset,
     tokenizer=tokenizer,
