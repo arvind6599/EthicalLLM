@@ -50,7 +50,6 @@ model_for_classification = AutoModelForSequenceClassification.from_pretrained(
 )
 model_for_classification = get_peft_model(model_for_classification, lora_config)
 
-
 # tokenizer = transformers.AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
 # model_for_classification = AutoModelForSequenceClassification.from_pretrained(model_name, config=lora_config,
 # quantization_config=quantization_config)
@@ -90,8 +89,27 @@ def tokenize_function(examples):
 
 tokenized_dataset = dataset["train"].map(tokenize_function, batched=True)
 '''
+train_data = dataset_train.select(
+    [i for i in range(len(dataset["train"])) if i % 10 != 0])  # Use 90% of the data for training
+val_data = dataset_train.select(
+    [i for i in range(len(dataset["train"])) if i % 10 == 0])  # Use 10% of the data for validation
+print(len(train_data))
+print(len(val_data))
 
 
+def tokenize_function(examples):
+    inputs = tokenizer(examples['prompt'], return_tensors='pt', padding='max_length', max_length=60,
+                       truncation=True)
+    labels = tokenizer(examples['revised_answer'], return_tensors='pt', padding='max_length', max_length=60,
+                       truncation=True)
+    return {'input_ids': inputs['input_ids'], 'labels': labels['input_ids']}
+
+
+# Apply tokenization to the datasets
+train_data = train_data.map(tokenize_function, batched=True)
+val_data = val_data.map(tokenize_function, batched=True)
+
+'''
 def preprocess_function(examples, tokenizer=tokenizer):
     new_examples = {
         "input_ids_prompt": [],
@@ -115,9 +133,10 @@ training_dataset = dataset_train.map(
     batched=True,
     num_proc=4
 )
+'''
 
-print(len(training_dataset))
-print(training_dataset[38])
+#print(len(training_dataset))
+#print(training_dataset[38])
 # Tokenize dataset
 # tokenized_dataset = dataset["train"].map(tokenize_function, batched=True, remove_columns=["prompt", "revised_answer"])
 # data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
@@ -170,7 +189,8 @@ trainer = Trainer(
     model=model_for_classification,
     args=training_args,
     train_dataset=training_dataset,
-    tokenizer=tokenizer
+    tokenizer=tokenizer,
+    eval_dataset=val_data
 )
 
 start = time.time()
@@ -180,7 +200,7 @@ try:
     print("Training completed successfully!")
 except Exception as e:
     print(f"Error during training: {e}")
-#trainer.train()
+# trainer.train()
 print("Completed!")
 print("Time taken for sft training:", time.time() - start)
 print("Pushing to hub...")
