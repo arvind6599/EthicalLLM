@@ -53,13 +53,7 @@ model_for_classification = get_peft_model(model_for_classification, lora_config)
 actual_model = AutoModelForSequenceClassification.from_pretrained(
     "mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
 
-tokenizer = transformers.AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token,
-                                                       padding="max_length", truncation=True)
-if tokenizer.pad_token is None:
-    tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
-    actual_model.resize_token_embeddings(len(tokenizer))
-actual_model.config.pad_token_id = actual_model.config.eos_token_id
-
+#tokenizer = transformers.AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
 # model_for_classification = AutoModelForSequenceClassification.from_pretrained(model_name, config=lora_config,
 # quantization_config=quantization_config)
 # tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", model_max_length=100,
@@ -71,14 +65,14 @@ try:
     print("Tokenizer loaded successfully")
 except Exception as e:
     print(f"Error loading tokenizer: {e}")
-
+'''
 tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", model_max_length=100,
                                           padding="max_length", truncation=True, token=access_token)
 if tokenizer.pad_token is None:
     tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
     actual_model.resize_token_embeddings(len(tokenizer))
 actual_model.config.pad_token_id = actual_model.config.eos_token_id
-'''
+
 # model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_cache=False,
 # token=access_token) tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2",
 # token=access_token) model.to(device)
@@ -119,20 +113,18 @@ def preprocess_function(examples, tokenizer=tokenizer):
 
 
 def preprocess_function1(examples):
-    inputs = [str(example) for example in examples["prompt"]]
-    targets = [str(example) for example in examples["revised_answer"]]
+    output_text = []
+    for i in range(len(examples["prompt"])):
+        instruction = examples["prompt"][i]
+        response = examples["revised_answer"][i]
+        text = f''' ### Prompt:
+                    {instruction}
 
-    # Tokenize the prompts
-    tokenized_inputs = tokenizer(inputs, truncation=True, padding="max_length", max_length=100)
-    tokenized_targets = tokenizer(targets, truncation=True, padding="max_length", max_length=100)
-
-    return {
-        "input_ids_prompt": tokenized_inputs["input_ids"],
-        "attention_mask_prompt": tokenized_inputs["attention_mask"],
-        "input_ids_revised": tokenized_targets["input_ids"],
-        "attention_mask_revised": tokenized_targets["attention_mask"]
-    }
-
+                    ### Response:
+                    {response}
+                    '''
+        output_text.append(text)
+    return output_text
 
 training_dataset = dataset_train.map(
     preprocess_function1,
