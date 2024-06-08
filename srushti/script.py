@@ -124,10 +124,10 @@ def preprocess_function(examples, tokenizer=tokenizer):
     for prompt, answers in zip(examples["prompt"], examples["revised_answer"]):
         tokenized_prompt = tokenizer(prompt, truncation=True, padding="max_length", max_length=60)
         tokenized_rejected = tokenizer(answers, truncation=True, padding="max_length", max_length=60)
-        new_examples["input_ids_prompt"].append(tokenized_prompt["input_ids"], max_length=60)
-        new_examples["attention_mask_prompt"].append(tokenized_prompt["attention_mask"], max_length=60)
-        new_examples["input_ids_revised"].append(tokenized_rejected["input_ids"], max_length=60)
-        new_examples["attention_mask_revised"].append(tokenized_rejected["attention_mask"], max_length=60)
+        new_examples["input_ids_prompt"].append(tokenized_prompt["input_ids"])
+        new_examples["attention_mask_prompt"].append(tokenized_prompt["attention_mask"])
+        new_examples["input_ids_revised"].append(tokenized_rejected["input_ids"])
+        new_examples["attention_mask_revised"].append(tokenized_rejected["attention_mask"])
 
     return new_examples
 
