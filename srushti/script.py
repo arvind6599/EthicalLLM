@@ -110,6 +110,7 @@ train_data = train_data.map(tokenize_function, batched=True)
 val_data = val_data.map(tokenize_function, batched=True)
 print(len(train_data))
 print(len(val_data))
+print(train_data[0])
 
 '''
 def preprocess_function(examples, tokenizer=tokenizer):
