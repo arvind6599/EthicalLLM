@@ -28,7 +28,7 @@ quantization_config = BitsAndBytesConfig(
     bnb_4bit_quant_type="nf4",
     bnb_4bit_compute_dtype=torch.float16,
 )
-config = AutoConfig.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", num_labels=1, use_auth_token=access_token)
+config = AutoConfig.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_auth_token=access_token)
 
 # lora config
 LORA_R = 8
@@ -45,6 +45,7 @@ lora_config = LoraConfig(
 
 model_for_classification = AutoModelForSequenceClassification.from_pretrained(
     "mistralai/Mistral-7B-Instruct-v0.2",
+    config=config,
     quantization_config=quantization_config,
     device_map=device_map, token=access_token
 )
@@ -68,7 +69,7 @@ tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", 
 if tokenizer.pad_token is None:
     tokenizer.add_special_tokens({'pad_token': '[PAD]'})
     model_for_classification.resize_token_embeddings(len(tokenizer))
-
+model_for_classification.config.pad_token_id = model_for_classification.config.eos_token_id
 
 # model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_cache=False,
 # token=access_token) tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2",
@@ -114,6 +115,7 @@ print(train_data[0])
 
 '''
 
+
 def preprocess_function(examples, tokenizer=tokenizer):
     new_examples = {
         "input_ids_prompt": [],
@@ -144,8 +146,8 @@ val_data = val_data.map(
     num_proc=4
 )
 print(train_data[0])
-#print(len(training_dataset))
-#print(training_dataset[38])
+# print(len(training_dataset))
+# print(training_dataset[38])
 # Tokenize dataset
 # tokenized_dataset = dataset["train"].map(tokenize_function, batched=True, remove_columns=["prompt", "revised_answer"])
 # data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
@@ -176,6 +178,10 @@ model_kwargs = dict(
     trust_remote_code=model_config.trust_remote_code,
     device_map=get_kbit_device_map() if quantization_config is not None else None,
 )'''
+parser = HfArgumentParser((SFTConfig, ModelConfig))
+reward_config, model_config = parser.parse_args_into_dataclasses(args=cmd_args)
+reward_config.gradient_checkpointing_kwargs = dict(use_reentrant=False)
+
 
 # Training Arguments
 training_args = TrainingArguments(
@@ -195,12 +201,13 @@ training_args = TrainingArguments(
 )
 
 # Initialize Trainer
-trainer = Trainer(
+trainer = SFTTrainer(
     model=model_for_classification,
-    args=training_args,
+    args=reward_config,
     train_dataset=train_data,
     tokenizer=tokenizer,
-    eval_dataset=val_data
+    eval_dataset=val_data,
+    peft_config=lora_config
 )
 
 start = time.time()
