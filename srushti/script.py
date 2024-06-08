@@ -96,7 +96,7 @@ val_data = dataset_train.select(
 print(len(train_data))
 print(len(val_data))
 
-
+'''
 def tokenize_function(examples):
     inputs = tokenizer(examples['prompt'], return_tensors='pt', padding='max_length', max_length=60,
                        truncation=True)
@@ -113,6 +113,7 @@ print(len(val_data))
 print(train_data[0])
 
 '''
+
 def preprocess_function(examples, tokenizer=tokenizer):
     new_examples = {
         "input_ids_prompt": [],
@@ -131,12 +132,17 @@ def preprocess_function(examples, tokenizer=tokenizer):
     return new_examples
 
 
-training_dataset = dataset_train.map(
+training_dataset = train_data.map(
     preprocess_function,
     batched=True,
     num_proc=4
 )
-'''
+
+training_dataset = eval_data.map(
+    preprocess_function,
+    batched=True,
+    num_proc=4
+)
 
 #print(len(training_dataset))
 #print(training_dataset[38])
