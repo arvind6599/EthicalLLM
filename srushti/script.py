@@ -110,8 +110,8 @@ def preprocess_function(examples, tokenizer=tokenizer):
 
 
 def preprocess_function1(examples):
-    inputs = examples["prompt"]
-    targets = examples["revised_answer"]
+    inputs = [str(example) for example in examples["prompt"]]
+    targets = [str(example) for example in examples["revised_answer"]]
 
     # Ensure the inputs and targets are lists of strings
     if isinstance(inputs, str):
