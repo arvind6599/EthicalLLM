@@ -189,7 +189,7 @@ trainer = SFTTrainer(
     train_dataset=training_dataset,
     tokenizer=tokenizer,
     formatting_func=preprocess_function1,
-    max_length=50
+    max_seq_length=50
 )
 start = time.time()
 print("Training...")
