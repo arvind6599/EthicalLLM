@@ -80,6 +80,7 @@ model_for_classification.config.pad_token_id = model_for_classification.config.e
 dataset = load_dataset("srushtisingh/Ethical")
 
 dataset_train = dataset["train"]
+print(len(dataset_train))
 
 '''
 def tokenize_function(examples):
