@@ -113,12 +113,6 @@ def preprocess_function1(examples):
     inputs = [str(example) for example in examples["prompt"]]
     targets = [str(example) for example in examples["revised_answer"]]
 
-    # Ensure the inputs and targets are lists of strings
-    if isinstance(inputs, str):
-        inputs = [inputs]
-    if isinstance(targets, str):
-        targets = [targets]
-
     # Tokenize the prompts
     tokenized_inputs = tokenizer(inputs, truncation=True, padding="max_length", max_length=100)
     tokenized_targets = tokenizer(targets, truncation=True, padding="max_length", max_length=100)
