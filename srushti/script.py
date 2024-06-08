@@ -135,13 +135,18 @@ def preprocess_function(examples, tokenizer=tokenizer):
     return new_examples
 
 
-def formatting_prompts_func(example):
-
-    text = f'''Prompt: {example['prompt']}
-    
-    Response:{example['revised_answer']}
-    '''
-    return text
+def formatting_prompts_func(examples):
+    output_text = []
+    for i in range(len(examples["prompt"])):
+        instruction = examples["prompt"][i]
+        response = examples["revised_answer"][i]
+        text = f'''
+        Prompt: {instruction}
+        
+        Response:{response}
+        '''
+        output_text.append(text)
+    return output_text
 
 '''
 train_data = train_data.map(
