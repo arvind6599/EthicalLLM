@@ -15,7 +15,7 @@ from peft import (
 import os
 import time
 from peft import get_peft_model
-from trl import ModelConfig, SFTTrainer, SFTConfig
+from trl import ModelConfig, SFTTrainer
 import transformers
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
@@ -123,6 +123,7 @@ def preprocess_function(examples, tokenizer=tokenizer):
         "input_ids_revised": [],
         "attention_mask_revised": [],
     }
+    tokenizer.truncation_side = "left"
     for prompt, answers in zip(examples["prompt"], examples["revised_answer"]):
         tokenized_prompt = tokenizer(prompt, truncation=True, padding="max_length", max_length=60)
         tokenized_rejected = tokenizer(answers, truncation=True, padding="max_length", max_length=60)
@@ -145,6 +146,7 @@ val_data = val_data.map(
     batched=True,
     num_proc=4
 )
+data_collator = DataCollatorWithPadding(tokenizer)
 print(train_data[0])
 # print(len(training_dataset))
 # print(training_dataset[38])
@@ -178,10 +180,6 @@ model_kwargs = dict(
     trust_remote_code=model_config.trust_remote_code,
     device_map=get_kbit_device_map() if quantization_config is not None else None,
 )'''
-parser = HfArgumentParser((SFTConfig, ModelConfig))
-reward_config, model_config = parser.parse_args_into_dataclasses(args=cmd_args)
-reward_config.gradient_checkpointing_kwargs = dict(use_reentrant=False)
-
 
 # Training Arguments
 training_args = TrainingArguments(
@@ -201,13 +199,13 @@ training_args = TrainingArguments(
 )
 
 # Initialize Trainer
-trainer = SFTTrainer(
+trainer = Trainer(
     model=model_for_classification,
-    args=reward_config,
+    args=training_args,
     train_dataset=train_data,
     tokenizer=tokenizer,
     eval_dataset=val_data,
-    peft_config=lora_config
+    data_collator=data_collator
 )
 
 start = time.time()
