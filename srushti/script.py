@@ -135,6 +135,15 @@ def preprocess_function(examples, tokenizer=tokenizer):
     return new_examples
 
 
+def formatting_prompts_func(example):
+
+    text = f'''Prompt: {example['prompt']}
+    
+    Response:{example['revised_answer']}
+    '''
+    return text
+
+'''
 train_data = train_data.map(
     preprocess_function,
     batched=True,
@@ -145,7 +154,7 @@ val_data = val_data.map(
     preprocess_function,
     batched=True,
     num_proc=4
-)
+)'''
 data_collator = DataCollatorWithPadding(tokenizer)
 print(train_data[0])
 # print(len(training_dataset))
@@ -206,7 +215,7 @@ trainer = SFTTrainer(
     tokenizer=tokenizer,
     eval_dataset=val_data,
     data_collator=data_collator,
-    formatting_func=preprocess_function
+    formatting_func=formatting_prompts_func
 )
 
 start = time.time()
