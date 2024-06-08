@@ -51,6 +51,8 @@ model_for_classification = get_peft_model(model_for_classification, lora_config)
 
 actual_model = AutoModelForSequenceClassification.from_pretrained(
     "mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
+
+tokenizer = transformers.AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
 # model_for_classification = AutoModelForSequenceClassification.from_pretrained(model_name, config=lora_config,
 # quantization_config=quantization_config)
 # tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", model_max_length=100,
@@ -61,7 +63,7 @@ try:
                                               padding="max_length", truncation=True)
     print("Tokenizer loaded successfully")
 except Exception as e:
-    print(f"Error loading tokenizer: {e}")'''
+    print(f"Error loading tokenizer: {e}")
 
 tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", model_max_length=100,
                                           padding="max_length", truncation=True, token=access_token)
@@ -69,7 +71,7 @@ if tokenizer.pad_token is None:
     tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
     actual_model.resize_token_embeddings(len(tokenizer))
 actual_model.config.pad_token_id = actual_model.config.eos_token_id
-
+'''
 # model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_cache=False,
 # token=access_token) tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2",
 # token=access_token) model.to(device)
