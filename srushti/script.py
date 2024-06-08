@@ -116,7 +116,7 @@ training_dataset = dataset_train.map(
 )
 # Tokenize dataset
 # tokenized_dataset = dataset["train"].map(tokenize_function, batched=True, remove_columns=["prompt", "revised_answer"])
-data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
+# data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
 cmd_args = [
     "--per_device_train_batch_size=20",
@@ -166,8 +166,7 @@ trainer = Trainer(
     model=model_for_classification,
     args=training_args,
     train_dataset=training_dataset,
-    tokenizer=tokenizer,
-    data_collator=data_collator
+    tokenizer=tokenizer
 )
 
 start = time.time()
