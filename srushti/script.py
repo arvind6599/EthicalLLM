@@ -117,7 +117,7 @@ training_dataset = dataset_train.map(
 )
 
 print(len(training_dataset))
-print(training_dataset[0])
+print(training_dataset[38])
 # Tokenize dataset
 # tokenized_dataset = dataset["train"].map(tokenize_function, batched=True, remove_columns=["prompt", "revised_answer"])
 # data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
