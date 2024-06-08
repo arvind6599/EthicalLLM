@@ -15,7 +15,7 @@ from peft import (
 import os
 import time
 from peft import get_peft_model
-from trl import SFTConfig, ModelConfig, SFTTrainer
+from trl import ModelConfig, SFTTrainer
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
@@ -49,7 +49,7 @@ model_for_classification = AutoModelForSequenceClassification.from_pretrained(
 )
 model_for_classification = get_peft_model(model_for_classification, lora_config)
 
-actual_model = model_for_classification = AutoModelForSequenceClassification.from_pretrained(
+actual_model = AutoModelForSequenceClassification.from_pretrained(
     "mistralai/Mistral-7B-Instruct-v0.2", token=access_token
 )
 # model_for_classification = AutoModelForSequenceClassification.from_pretrained(model_name, config=lora_config,
