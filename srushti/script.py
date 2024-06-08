@@ -175,7 +175,12 @@ trainer = Trainer(
 
 start = time.time()
 print("Training...")
-trainer.train()
+try:
+    trainer.train()
+    print("Training completed successfully!")
+except Exception as e:
+    print(f"Error during training: {e}")
+#trainer.train()
 print("Completed!")
 print("Time taken for sft training:", time.time() - start)
 print("Pushing to hub...")
