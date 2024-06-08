@@ -15,7 +15,7 @@ from peft import (
 import os
 import time
 from peft import get_peft_model
-from trl import ModelConfig, SFTTrainer
+from trl import ModelConfig, SFTTrainer, SFTConfig
 import transformers
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
