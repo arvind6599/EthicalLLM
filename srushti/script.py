@@ -16,6 +16,7 @@ import os
 import time
 from peft import get_peft_model
 from trl import ModelConfig, SFTTrainer
+import transformers
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
