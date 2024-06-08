@@ -126,11 +126,12 @@ def preprocess_function1(examples):
         output_text.append(text)
     return output_text
 
+'''
 training_dataset = dataset_train.map(
     preprocess_function1,
     batched=True,
     num_proc=4
-)
+)'''
 # Tokenize dataset
 # tokenized_dataset = dataset["train"].map(tokenize_function, batched=True, remove_columns=["prompt", "revised_answer"])
 
