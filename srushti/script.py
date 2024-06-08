@@ -205,7 +205,8 @@ trainer = SFTTrainer(
     train_dataset=train_data,
     tokenizer=tokenizer,
     eval_dataset=val_data,
-    data_collator=data_collator
+    data_collator=data_collator,
+    formatting_func=preprocess_function
 )
 
 start = time.time()
