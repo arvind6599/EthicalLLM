@@ -204,6 +204,12 @@ try:
     print("Training completed successfully!")
 except Exception as e:
     print(f"Error during training: {e}")
+
+try:
+    trainer.evaluate()
+    print("Training completed successfully!")
+except Exception as e:
+    print(f"Error during evaluation: {e}")
 # trainer.train()
 print("Completed!")
 print("Time taken for sft training:", time.time() - start)
