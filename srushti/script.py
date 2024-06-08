@@ -33,7 +33,7 @@ config = AutoConfig.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", num_la
 # lora config
 LORA_R = 8
 LORA_ALPHA = 32
-LORA_DROPOUT = 0.1
+LORA_DROPOUT = 0.01
 lora_config = LoraConfig(
     task_type=TaskType.SEQ_CLS,
     inference_mode=False,
@@ -48,7 +48,7 @@ model_for_classification = AutoModelForSequenceClassification.from_pretrained(
     quantization_config=quantization_config,
     device_map=device_map, token=access_token
 )
-# model_for_classification = get_peft_model(model_for_classification, lora_config)
+model_for_classification = get_peft_model(model_for_classification, lora_config)
 
 
 # tokenizer = transformers.AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
