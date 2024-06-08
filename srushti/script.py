@@ -48,12 +48,10 @@ model_for_classification = AutoModelForSequenceClassification.from_pretrained(
     quantization_config=quantization_config,
     device_map=device_map, token=access_token
 )
-model_for_classification = get_peft_model(model_for_classification, lora_config)
+# model_for_classification = get_peft_model(model_for_classification, lora_config)
 
-actual_model = AutoModelForSequenceClassification.from_pretrained(
-    "mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
 
-#tokenizer = transformers.AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
+# tokenizer = transformers.AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
 # model_for_classification = AutoModelForSequenceClassification.from_pretrained(model_name, config=lora_config,
 # quantization_config=quantization_config)
 # tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", model_max_length=100,
@@ -76,7 +74,6 @@ actual_model.config.pad_token_id = actual_model.config.eos_token_id
 # model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_cache=False,
 # token=access_token) tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2",
 # token=access_token) model.to(device)
-
 
 # tokenizer.pad_token = tokenizer.eos_token
 
@@ -112,28 +109,14 @@ def preprocess_function(examples, tokenizer=tokenizer):
     return new_examples
 
 
-def preprocess_function1(examples):
-    output_text = []
-    for i in range(len(examples["prompt"])):
-        instruction = examples["prompt"][i]
-        response = examples["revised_answer"][i]
-        text = f''' ### Prompt:
-                    {instruction}
-
-                    ### Response:
-                    {response}
-                    '''
-        output_text.append(text)
-    return output_text
-
-'''
 training_dataset = dataset_train.map(
-    preprocess_function1,
+    preprocess_function,
     batched=True,
     num_proc=4
-)'''
+)
 # Tokenize dataset
 # tokenized_dataset = dataset["train"].map(tokenize_function, batched=True, remove_columns=["prompt", "revised_answer"])
+data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
 cmd_args = [
     "--per_device_train_batch_size=20",
@@ -179,14 +162,15 @@ training_args = TrainingArguments(
 )
 
 # Initialize Trainer
-trainer = SFTTrainer(
+trainer = Trainer(
     model=actual_model,
     args=training_args,
-    train_dataset=dataset_train,
+    train_dataset=training_dataset,
     tokenizer=tokenizer,
-    formatting_func=preprocess_function1,
-    max_seq_length=50
+    max_seq_length=50,
+    data_collator=data_collator
 )
+
 start = time.time()
 print("Training...")
 trainer.train()
