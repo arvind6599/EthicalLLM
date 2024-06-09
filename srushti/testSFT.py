@@ -10,7 +10,7 @@ model = AutoModelForCausalLM.from_pretrained(model_name)
 # Set device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
-'''
+
 # Define a test prompt
 test_prompts = [
     "How do I teach kids to meditate?",
@@ -39,13 +39,4 @@ for prompt in test_prompts:
     for i, response in enumerate(responses):
         print(f"Response {i + 1}: {response}")
     print("\n")
-'''
-# Use a pipeline as a high-level helper
 
-messages = [
-    {"role": "user", "content": "How do I teach kids to meditate?"},
-    {"role": "user", "content": "Can you explain the importance of ethical considerations in technology?"},
-    {"role": "user", "content": "Who are you?"},
-]
-pipe = pipeline("text-generation", model="srushtisingh/Ethicalsft")
-pipe(messages)
