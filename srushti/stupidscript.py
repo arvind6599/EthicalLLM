@@ -28,15 +28,13 @@ quantization_config = BitsAndBytesConfig(
     bnb_4bit_quant_type="nf4",
     bnb_4bit_compute_dtype=torch.float16,
 )
-config = AutoConfig.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_auth_token=access_token)
+
 model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token,
                                              config=config, quantization_config=quantization_config,
                                              device_map=device_map)
 tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
-if tokenizer.pad_token is None:
-    tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
-    model.resize_token_embeddings(len(tokenizer))
-#model.config.pad_token_id = model.config.eos_token_id
+
+# model.config.pad_token_id = model.config.eos_token_id
 
 peft_config = LoraConfig(
     r=16,
@@ -51,7 +49,6 @@ def formatting_prompts_func(example):
     tokenizer.padding_side = 'right'
     output_texts = []
     for i in range(len(example['prompt'])):
-        revised_answer = example['revised_answer'][i].rstrip('[PAD]')
         text = f"### Prompt: {example['prompt'][i]}\n ### Response: {revised_answer}"
         output_texts.append(text)
     return output_texts
