@@ -21,7 +21,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the dev
 device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
 access_token = "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"
 
-dataset = load_dataset("srushtisingh/Ethical", split="train")
+dataset = load_dataset("srushtisingh/EthicalLLM_10k", split="train")
 
 quantization_config = BitsAndBytesConfig(
     load_in_4bit=True,
@@ -58,13 +58,13 @@ def formatting_prompts_func(example):
 
 
 response_template = " ### Response:"
-collator = DataCollatorForCompletionOnlyLM(tokenizer.encode(f"\n{response_template}", add_special_tokens = False)[2:],
+collator = DataCollatorForCompletionOnlyLM(tokenizer.encode(f"\n{response_template}", add_special_tokens=False)[2:],
                                            tokenizer=tokenizer)
 trainer = SFTTrainer(
     model,
     train_dataset=dataset,
     args=SFTConfig(output_dir="/tmp",
-                   per_device_train_batch_size=8,
+                   per_device_train_batch_size=10,
                    num_train_epochs=2,
                    max_seq_length=150
                    ),
