@@ -30,7 +30,7 @@ quantization_config = BitsAndBytesConfig(
 )
 
 model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token,
-                                             config=config, quantization_config=quantization_config,
+                                            quantization_config=quantization_config,
                                              device_map=device_map)
 tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
 
