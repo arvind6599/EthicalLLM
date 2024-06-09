@@ -69,7 +69,7 @@ trainer = SFTTrainer(
                    ),
     formatting_func=formatting_prompts_func,
     data_collator=collator,
-    #peft_config=peft_config
+    peft_config=peft_config
 )
 write_token = "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"
 start = time.time()
@@ -83,5 +83,5 @@ except Exception as e:
 print("Completed!")
 print("Time taken for sft training:", time.time() - start)
 print("Pushing to hub...")
-trainer.model.push_to_hub("srushtisingh/EthicalSFTModel", token=write_token)
+trainer.model.push_to_hub("srushtisingh/EthicalSFT", token=write_token)
 # trainer.train()
