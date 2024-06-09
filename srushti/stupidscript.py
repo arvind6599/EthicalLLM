@@ -33,6 +33,7 @@ model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2
                                              quantization_config=quantization_config,
                                              device_map=device_map)
 tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
+tokenizer.add_special_tokens({'pad_token': '[PAD]'})
 
 # model.config.pad_token_id = model.config.eos_token_id
 
