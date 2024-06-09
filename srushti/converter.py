@@ -3,7 +3,7 @@ import torch
 from transformers import AutoTokenizer
 
 write_token = "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"
-access_token = "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"
+access_token = "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"
 
 def merge_and_upload(tokenizer=None):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
