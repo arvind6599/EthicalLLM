@@ -51,7 +51,7 @@ def formatting_prompts_func(example):
     tokenizer.padding_side = 'right'
     output_texts = []
     for i in range(len(example['prompt'])):
-        revised_answer = example['revised_answer'][i].rstrip('[PAD]')
+        revised_answer = example['revised_answer'][i].replace('[PAD]', '').strip()
         text = f"### Prompt: {example['prompt'][i]}\n ### Response: This is the answer: {revised_answer}"
         output_texts.append(text)
     return output_texts
