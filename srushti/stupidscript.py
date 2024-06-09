@@ -36,7 +36,7 @@ tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", 
 if tokenizer.pad_token is None:
     tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
     model.resize_token_embeddings(len(tokenizer))
-model.config.pad_token_id = model.config.eos_token_id
+#model.config.pad_token_id = model.config.eos_token_id
 
 peft_config = LoraConfig(
     r=16,
@@ -64,7 +64,7 @@ trainer = SFTTrainer(
     model,
     train_dataset=dataset,
     args=SFTConfig(output_dir="/tmp",
-                   max_seq_length=150),
+                   ),
     formatting_func=formatting_prompts_func,
     data_collator=collator,
     peft_config=peft_config
@@ -81,4 +81,4 @@ print("Completed!")
 print("Time taken for sft training:", time.time() - start)
 print("Pushing to hub...")
 trainer.model.push_to_hub("srushtisingh/EthicalSFT")
-#trainer.train()
+# trainer.train()
