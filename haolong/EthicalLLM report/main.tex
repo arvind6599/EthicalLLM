@@ -1,0 +1,53 @@
+\documentclass[11pt,titlepage]{report}
+\usepackage{Preamble}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{float}
+
+\begin{document}
+
+\begin{titlepage}
+    \newgeometry{margin=3cm}
+	\centering
+    \includegraphics[width=0.5\linewidth]{epfl.png}\\[0.25cm] 	% University Logo
+    \textsc{\LARGE École Polytechnique Fédérale de Lausanne}\\ \vspace{\fill}
+    \textbf{\textsc{\fontsize{50}{50}\selectfont Virtue ethics guidance of
+LLMS with RLAIF and
+ensemble of reward models}}\\ \vspace{\fill}		
+	\textsc{\LARGE DHLab Student Project}\\[0.4cm]
+	\rule{\linewidth}{0.2 mm} \\[0.5 cm]
+	Haolong Li \\[2cm] \today
+\end{titlepage}
+\restoregeometry
+
+% \thispagestyle{numberonly}
+% \begin{summary}
+% \section*{Abstract}
+
+% You can choose colours in the preamble kkk
+
+% \lipsum[1]
+% \end{summary}
+
+
+\chapter{Introduction}
+\subfile{1-Introduction}
+
+\chapter{Methods}
+\subfile{2-Methods}
+
+\chapter{Results}
+\subfile{3-Results}
+
+\chapter{Discussion}
+\subfile{4-Discussion}
+
+\chapter{Conclusion}
+\subfile{5-Conclusion}
+
+\clearpage
+\pagestyle{numberonly}
+\printbibliography
+
+\end{document}

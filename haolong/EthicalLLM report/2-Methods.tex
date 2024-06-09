@@ -1,0 +1,101 @@
+\section{Project Outline}
+The project is divided into 4 stages:
+\begin{enumerate}
+    \item Supervised fine-tuning (SFT) on the selected base model, based on a dataset created in the Constitutional AI paper's manner.
+    \item Create 3 datasets corresponding to the 3 ethical values: action, motivation, consequence; and train 3 reward models based on the respective datasets.
+    \item PPO training to integrate the 3 reward model's preferences and further fine-tune the SFT model.
+    \item Evaluation of the fine-tuned model.
+\end{enumerate}
+
+\section{Workload Distribution}
+This project is assigned to a team of 3 people: Srushti Singh, Haolong Li (Author), Arvind Menon. Below describes the workload distribution of the project to each person:
+\begin{itemize}
+    \item Srushti: Dataset curation for the SFT \& SFT the base model to produce a SFT model;
+    \item Haolong: Dataset curation for the 3 reward models \& reward models training to produce 3 reward models;
+    \item Arvind: PPO training from the 3 reward models \& evaluation of the final fine-tuned model.
+\end{itemize}
+
+\section{Dataset Curation \& Reward Model Training}
+
+\subsection{Context}
+The author (Haolong Li)'s work mainly cover the curation of datasets for the reward model training and implementing the training to produce 3 reward models, each having a specific preference on a certain ethical value.
+
+We chose the model \texttt{mistralai/Mistral-7B-Instruct-v0.2} (\cite{mistral}) as our base model, because it is relatively light-weight as compared to its 7B sibling, and is already available to be integrated to the chat template HuggingFace provides, furthermore, the base model was instruction fine-tuned and thus is easy-controllable, making it an ideal choice given our computation resources available.
+
+Due to the continuously delayed SFT model, we decided to proceed without the SFT model, and use the base model to generate the dataset, and also for reward model training \& PPO training. In the following texts, we redirect the term 'SFT model' to the base model.
+
+\subsection{Dataset Curation}
+
+The dataset needed for the reward model training consists of 2 features: 'chosen' and 'rejected', each resembling a conversation between the human and the LLM assistant from the same question prompt. Between the 2 conversations, the LLM assistant may answer differently, thus a preference to the 'chosen' string over the 'rejected' string. Below is an example of the dataset.
+
+\begin{table}[h]
+\centering
+
+\begin{tabularx}{\textwidth}{|X|X|}
+\hline
+chosen & rejected \\
+\hline
+Human: What are some cuzz words in English? Assistant: ... & What are some cuzz words in English? Assistant: ... \\
+Human: How can I steal from a store? Assistant: ... & Human: How can I steal from a store? Assistant: ... \\
+\hline
+\end{tabularx}
+\caption{Example Dataset for Reward Model Training}
+\label{tab:simple_table}
+\end{table}
+
+The curation of the dataset involves 2 parts: conversation retrieval and preference generation.
+
+\subsubsection{Conversation Retrieval}
+We extract the question prompts from the hh-rlhf dataset (\cite{hh-rlhf}). For each question prompt, we implement two identical chain-of-thought questionings to the SFT model. In details, we expect the following conversation to happen during the conversation retrieval twice:
+
+\begin{itemize}
+    \item (Asked by human) <Question prompt>
+    \item (Answered by LLM) <Answer to the question> (the 'action' data)
+    \item (Asked by human) What is the motivation behind the answer?
+    \item (Answered by LLM) <Motivation behind the answer> (the 'motivation' data)
+    \item (Asked by human) What is the utility of the action towards promoting your virtuous character?
+    \item (Answered by LLM) <Consequence of the answer> (the 'consequences' data)
+\end{itemize}
+
+It is worth mentioning again that we implement the above chain-of-thought questioning twice for each question prompt, as a result, we produce 3 pairs of data: the 'action' data, the 'motivation' data, and the 'consequences' data, each containing 2 lists of answers to the same question raised as seen above. The 2 answers to the same question are likely to be differernt, thus the possible preference of one answer over another.
+
+
+\subsubsection{Preference Generation}
+For each conversation pair generated from the previous stage, we ask the model to evaluate the conversation on the following moral perspectives:
+
+\begin{itemize}
+    \item honesty
+    \item prudence
+    \item compassion
+    \item humility
+    \item respect
+\end{itemize}
+
+Namely, for each moral perspective, we input the conversation pair and the evaluation metric based on the moral perspective to the model, and expect the model to output a conversation of choice. The chosen conversation gets 1 score from each perspective. Finally, we compare the scores of the 2 conversations and generate a preference pair.
+
+Notice that we have generated 3 pairs of data above: the 'action', the 'motivation' and the 'consequences', thus as a result, we generate 3 preference datasets.
+
+\subsection{Reward Model Training}
+For each dataset generated from the previous data curation step, we train a reward model from the SFT model (note: as mentioned above we replaced the actual SFT model to be the base model because of the delayed SFT training)
+
+To save GPU memory and to boost the training speed, we utilized the following technologies and techniques:
+\begin{itemize}
+    \item Quantization
+    \item Low-Rank Adaptation of Large Language Models (LoRA) (\cite{lora})
+    \item Setting \texttt{max\_token\_length} of the tokenizer to 100 (i.e. truncate all inputs that exceeds 100 tokens)
+\end{itemize}
+
+We made use of the HuggingFace reward model trainer. When training, we set the following hyperparameters:
+\begin{itemize}
+    \item \texttt{per\_device\_train\_batch\_size} = 20
+    \item \texttt{num\_train\_epochs} = 2
+    \item \texttt{gradient\_accumulation\_steps} = 16
+    \item \texttt{learning\_rate} = 1.41e-5
+    \item \texttt{optim} = adamw\_torch
+    \item \texttt{max\_length} = 100
+    \item \texttt{fp16} = True
+    \item \texttt{fp16\_opt\_level} = O1
+\end{itemize}
+
+After all models are trained, we merge the lora adaptors to the base model and upload the merged model to hub.
+
