@@ -1,6 +1,7 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from datasets import load_dataset
 from trl import SFTConfig, SFTTrainer, DataCollatorForCompletionOnlyLM
+import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
