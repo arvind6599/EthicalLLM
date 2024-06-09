@@ -28,10 +28,10 @@ quantization_config = BitsAndBytesConfig(
     bnb_4bit_compute_dtype=torch.float16,
 )
 
-model = AutoModelForCausalLM.from_pretrained("srushtisingh/EthicalSFT", token=access_token,
+model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token,
                                             # quantization_config=quantization_config,
                                              device_map=device_map)
-tokenizer = AutoTokenizer.from_pretrained("srushtisingh/EthicalSFT", token=access_token)
+tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
 if tokenizer.pad_token is None:
     tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
     model.resize_token_embeddings(len(tokenizer))
@@ -83,5 +83,5 @@ except Exception as e:
 print("Completed!")
 print("Time taken for sft training:", time.time() - start)
 print("Pushing to hub...")
-trainer.model.push_to_hub("srushtisingh/EthicalSFT", token=write_token)
+trainer.model.push_to_hub("srushtisingh/EthicalSFTModel", token=write_token)
 # trainer.train()
