@@ -51,9 +51,8 @@ def formatting_prompts_func(example):
     tokenizer.padding_side = 'right'
     output_texts = []
     for i in range(len(example['prompt'])):
-        print(example['revised_answer'][i])
         revised_answer = example['revised_answer'][i].replace('[PAD]', '').strip()
-        text = f"### Prompt: {example['prompt'][i]}\n ### Response: This is the answer: {revised_answer}"
+        text = f"### Prompt: {example['prompt'][i]}\n ### Response: {revised_answer}"
         output_texts.append(text)
     return output_texts
 
@@ -62,11 +61,42 @@ response_template = " ### Response:"
 collator = DataCollatorForCompletionOnlyLM(tokenizer.encode(f"\n{response_template}", add_special_tokens = False)[2:],
                                            tokenizer=tokenizer)
 
+cmd_args = [
+    "--per_device_train_batch_size=20",
+    "--output_dir=reward_modeling_consequences",
+    "--num_train_epochs=2",
+    "--gradient_accumulation_steps=16",
+    "--gradient_checkpointing=True",
+    "--learning_rate=1.41e-5",
+    "--report_to=tensorboard",
+    "--remove_unused_columns=False",
+    "--optim=adamw_torch",
+    "--logging_steps=10",
+    "--evaluation_strategy=steps",
+    "--max_length=100",
+    "--save_total_limit=1",
+    "--load_best_model_at_end=True",
+    "--fp16=True",
+    "--fp16_opt_level=O1",
+    ]
+    ################
+    # Config parsing
+    ################
+parser = HfArgumentParser((SFTConfig, ModelConfig))
+reward_config, model_config = parser.parse_args_into_dataclasses(args=cmd_args)
+reward_config.gradient_checkpointing_kwargs = dict(use_reentrant=False)
+
+model_kwargs = dict(
+        revision=model_config.model_revision,
+        trust_remote_code=model_config.trust_remote_code,
+        device_map=get_kbit_device_map() if quantization_config is not None else None,
+    )
+
+
 trainer = SFTTrainer(
     model,
     train_dataset=dataset,
-    args=SFTConfig(output_dir="/tmp",
-                   ),
+    args=reward_config,
     formatting_func=formatting_prompts_func,
     data_collator=collator,
     peft_config=peft_config
