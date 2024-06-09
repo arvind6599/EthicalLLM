@@ -1,4 +1,4 @@
-from peft import AutoPeftModelForSequenceClassification
+from peft import AutoPeftModelForCausalLM
 import torch
 from transformers import AutoTokenizer
 
@@ -8,7 +8,7 @@ access_token = "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"
 def merge_and_upload(tokenizer=None):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model_id = 'srushtisingh/EthicalSFT'
-    peft_model = AutoPeftModelForSequenceClassification.from_pretrained(model_id)
+    peft_model = AutoPeftModelForCausalLM.from_pretrained(model_id)
     merged_model = peft_model.merge_and_unload()
     merged_model.to(device)
     print("Model merged: ")
