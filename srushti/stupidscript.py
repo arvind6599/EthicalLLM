@@ -59,7 +59,7 @@ trainer = SFTTrainer(
     model,
     train_dataset=dataset,
     args=SFTConfig(output_dir="/tmp",
-                   max_seq_length=60),
+                   max_seq_length=150),
     formatting_func=formatting_prompts_func,
     data_collator=collator,
     peft_config=peft_config
