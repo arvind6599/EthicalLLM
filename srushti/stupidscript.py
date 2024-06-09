@@ -29,7 +29,7 @@ quantization_config = BitsAndBytesConfig(
 )
 
 model = AutoModelForCausalLM.from_pretrained("srushtisingh/EthicalSFT", token=access_token,
-                                             quantization_config=quantization_config,
+                                            # quantization_config=quantization_config,
                                              device_map=device_map)
 tokenizer = AutoTokenizer.from_pretrained("srushtisingh/EthicalSFT", token=access_token)
 if tokenizer.pad_token is None:
@@ -63,7 +63,7 @@ trainer = SFTTrainer(
     model,
     train_dataset=dataset,
     args=SFTConfig(output_dir="/tmp",
-                   per_device_train_batch_size=10,
+                   per_device_train_batch_size=1,
                    num_train_epochs=2,
                    max_seq_length=150
                    ),
