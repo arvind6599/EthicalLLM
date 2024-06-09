@@ -18,8 +18,9 @@ test_prompts = [
     "Can you explain the importance of ethical considerations in technology?"
 ]
 
+
 # Function to generate responses
-def generate_response(prompt, model, tokenizer, max_length=100, num_return_sequences=1):
+def generate_response(prompt, model, tokenizer, max_length=50, num_return_sequences=1):
     inputs = tokenizer(prompt, return_tensors="pt").to(device)
     outputs = model.generate(
         inputs.input_ids,
@@ -39,4 +40,3 @@ for prompt in test_prompts:
     for i, response in enumerate(responses):
         print(f"Response {i + 1}: {response}")
     print("\n")
-
