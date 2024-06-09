@@ -59,13 +59,14 @@ def formatting_prompts_func(example):
 
 response_template = " ### Response:"
 collator = DataCollatorForCompletionOnlyLM(tokenizer.encode(f"\n{response_template}", add_special_tokens = False)[2:],
-                                           tokenizer=tokenizer, truncation=True, max_length=150)
+                                           tokenizer=tokenizer)
 trainer = SFTTrainer(
     model,
     train_dataset=dataset,
     args=SFTConfig(output_dir="/tmp",
                    per_device_train_batch_size=16,
-                   num_train_epochs=2
+                   num_train_epochs=2,
+                   max_seq_length=150
                    ),
     formatting_func=formatting_prompts_func,
     data_collator=collator,
