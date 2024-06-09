@@ -3,3 +3,6 @@
 
 # Temp files
 .DS_Store
+
+ethics/
+wandb/
