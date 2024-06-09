@@ -23,7 +23,14 @@ access_token = "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"
 
 dataset = load_dataset("srushtisingh/Ethical", split="train")
 
+quantization_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.float16,
+)
+config = AutoConfig.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", use_auth_token=access_token)
 model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token,
+                                             config=config, quantization_config=quantization_config,
                                              device_map=device_map)
 tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token,
                                           model_max_length=100,
@@ -32,6 +39,7 @@ tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", 
 if tokenizer.pad_token is None:
     tokenizer.add_special_tokens({'pad_token': '[PAD]'})
     model.resize_token_embeddings(len(tokenizer))
+model.config.pad_token_id = model.config.eos_token_id
 
 peft_config = LoraConfig(
     r=16,
