@@ -7,7 +7,7 @@ access_token = "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"
 
 def merge_and_upload(tokenizer=None):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model_id = 'srushtisingh/EthicalSFT'
+    model_id = 'srushtisingh/EthicalSFTModel'
     peft_model = AutoPeftModelForCausalLM.from_pretrained(model_id)
     merged_model = peft_model.merge_and_unload()
     merged_model.to(device)
