@@ -23,8 +23,29 @@ access_token = "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"
 
 dataset = load_dataset("srushtisingh/Ethical", split="train")
 
-model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
-tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
+model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token,
+                                             device_map=device_map)
+tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token,
+                                          model_max_length=100,
+                                          padding="max_length", truncation=True,
+                                          )
+if tokenizer.pad_token is None:
+    tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+    model.resize_token_embeddings(len(tokenizer))
+
+peft_config = LoraConfig(
+    r=16,
+    lora_alpha=32,
+    lora_dropout=0.05,
+    bias="none",
+    task_type="CAUSAL_LM",
+)
+train_data = dataset_train.select(
+    [i for i in range(len(dataset["train"])) if i % 10 != 0])  # Use 90% of the data for training
+val_data = dataset_train.select(
+    [i for i in range(len(dataset["train"])) if i % 10 == 0])  # Use 10% of the data for validation
+print(len(train_data))
+print(len(val_data))
 
 
 def formatting_prompts_func(example):
@@ -40,10 +61,11 @@ collator = DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenize
 
 trainer = SFTTrainer(
     model,
-    train_dataset=dataset,
+    train_dataset=train_data,
     args=SFTConfig(output_dir="/tmp"),
     formatting_func=formatting_prompts_func,
     data_collator=collator,
+    peft_config=peft_config
 )
 start = time.time()
 print("Training...")
@@ -52,12 +74,6 @@ try:
     print("Training completed successfully!")
 except Exception as e:
     print(f"Error during training: {e}")
-
-try:
-    trainer.evaluate()
-    print("Training completed successfully!")
-except Exception as e:
-    print(f"Error during evaluation: {e}")
 # trainer.train()
 print("Completed!")
 print("Time taken for sft training:", time.time() - start)
