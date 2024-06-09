@@ -43,6 +43,8 @@ peft_config = LoraConfig(
 
 
 def formatting_prompts_func(example):
+    tokenizer.padding_side = 'right'
+    tokenizer.truncation_side = "left"
     output_texts = []
     for i in range(len(example['prompt'])):
         text = f"### Prompt: {example['prompt'][i]}\n ### Answer: {example['revised_answer'][i]}"
@@ -50,13 +52,14 @@ def formatting_prompts_func(example):
     return output_texts
 
 
-response_template = "revised_answer:"
+response_template = " ### Answer:"
 collator = DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenizer)
 
 trainer = SFTTrainer(
     model,
     train_dataset=dataset,
-    args=SFTConfig(output_dir="/tmp"),
+    args=SFTConfig(output_dir="/tmp",
+                   max_seq_length=60),
     formatting_func=formatting_prompts_func,
     data_collator=collator,
     peft_config=peft_config
