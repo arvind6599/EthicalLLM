@@ -82,8 +82,8 @@ cmd_args = [
     ################
     # Config parsing
     ################
-parser = HfArgumentParser((SFTConfig, ModelConfig))
-reward_config, model_config = parser.parse_args_into_dataclasses(args=cmd_args)
+parser = TrlParser((SFTScriptArguments, SFTConfig, ModelConfig))
+args, training_args, model_config = parser.parse_args_and_config()
 reward_config.gradient_checkpointing_kwargs = dict(use_reentrant=False)
 
 model_kwargs = dict(
@@ -96,7 +96,7 @@ model_kwargs = dict(
 trainer = SFTTrainer(
     model,
     train_dataset=dataset,
-    args=reward_config,
+    args=training_args,
     formatting_func=formatting_prompts_func,
     data_collator=collator,
     peft_config=peft_config
