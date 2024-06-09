@@ -46,7 +46,6 @@ peft_config = LoraConfig(
 
 
 def formatting_prompts_func(example):
-    tokenizer.padding_side = 'right'
     output_texts = []
     for i in range(len(example['prompt'])):
         text = f"### Prompt: {example['prompt'][i]}\n ### Response: {example['revised_answer'][i]}"
