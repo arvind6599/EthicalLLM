@@ -17,7 +17,7 @@ from trl import ModelConfig, SFTTrainer
 from trl import SFTConfig
 import transformers
 
-CUDA_LAUNCH_BLOCKING=1
+CUDA_LAUNCH_BLOCKING = 1
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
