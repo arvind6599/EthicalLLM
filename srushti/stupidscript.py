@@ -19,7 +19,7 @@ import transformers
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
-access_token = "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"
+access_token = "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"
 
 dataset = load_dataset("srushtisingh/Ethical", split="train")
 
@@ -59,7 +59,7 @@ def formatting_prompts_func(example):
 
 response_template = " ### Response:"
 collator = DataCollatorForCompletionOnlyLM(tokenizer.encode(f"\n{response_template}", add_special_tokens = False)[2:],
-                                           tokenizer=tokenizer)
+                                           tokenizer=tokenizer, truncation=True, max_length=150)
 trainer = SFTTrainer(
     model,
     train_dataset=dataset,
@@ -71,7 +71,7 @@ trainer = SFTTrainer(
     data_collator=collator,
     peft_config=peft_config
 )
-write_token="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"
+write_token = "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"
 start = time.time()
 print("Training...")
 try:
