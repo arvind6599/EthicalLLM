@@ -49,7 +49,6 @@ peft_config = LoraConfig(
 
 def formatting_prompts_func(example):
     tokenizer.padding_side = 'right'
-    tokenizer.truncation_side = "left"
     output_texts = []
     for i in range(len(example['prompt'])):
         revised_answer = example['revised_answer'][i].rstrip('[PAD]')
