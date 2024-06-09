@@ -30,7 +30,7 @@ quantization_config = BitsAndBytesConfig(
 )
 
 model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token,
-                                            quantization_config=quantization_config,
+                                             quantization_config=quantization_config,
                                              device_map=device_map)
 tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
 
@@ -49,7 +49,7 @@ def formatting_prompts_func(example):
     tokenizer.padding_side = 'right'
     output_texts = []
     for i in range(len(example['prompt'])):
-        text = f"### Prompt: {example['prompt'][i]}\n ### Response: {revised_answer}"
+        text = f"### Prompt: {example['prompt'][i]}\n ### Response: {example['revised_answer'][i]}"
         output_texts.append(text)
     return output_texts
 
