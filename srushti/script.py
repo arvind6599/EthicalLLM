@@ -16,6 +16,7 @@ import os
 import time
 from peft import get_peft_model
 from trl import ModelConfig, SFTTrainer
+from trl import SFTConfig
 import transformers
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
@@ -211,6 +212,8 @@ training_args = TrainingArguments(
     gradient_checkpointing=True,
     load_best_model_at_end=True,
 )
+
+SFTConfig(output_dir="/tmp")
 
 # Initialize Trainer
 trainer = SFTTrainer(
