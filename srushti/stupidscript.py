@@ -50,7 +50,7 @@ def formatting_prompts_func(example):
     return output_texts
 
 
-response_template = " ### Answer:"
+response_template = "revised_answer:"
 collator = DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenizer)
 
 trainer = SFTTrainer(
