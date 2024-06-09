@@ -59,7 +59,8 @@ trainer = SFTTrainer(
     args=SFTConfig(output_dir="/tmp"),
     formatting_func=formatting_prompts_func,
     data_collator=collator,
-    peft_config=peft_config
+    peft_config=peft_config,
+    max_seq_length=60
 )
 start = time.time()
 print("Training...")
