@@ -1,4 +1,4 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, AutoConfig, HfArgumentParser
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, AutoConfig
 from datasets import load_dataset
 from trl import SFTConfig, SFTTrainer, DataCollatorForCompletionOnlyLM
 import torch
@@ -16,8 +16,6 @@ from peft import get_peft_model
 from trl import ModelConfig, SFTTrainer
 from trl import SFTConfig
 import transformers
-from trl.commands.cli_utils import SFTScriptArguments, TrlParser
-
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
@@ -62,47 +60,18 @@ def formatting_prompts_func(example):
 response_template = " ### Response:"
 collator = DataCollatorForCompletionOnlyLM(tokenizer.encode(f"\n{response_template}", add_special_tokens = False)[2:],
                                            tokenizer=tokenizer)
-
-cmd_args = [
-    "--per_device_train_batch_size=20",
-    "--output_dir=reward_modeling_consequences",
-    "--num_train_epochs=2",
-    "--gradient_accumulation_steps=16",
-    "--gradient_checkpointing=True",
-    "--learning_rate=1.41e-5",
-    "--report_to=tensorboard",
-    "--remove_unused_columns=False",
-    "--optim=adamw_torch",
-    "--logging_steps=10",
-    "--evaluation_strategy=steps",
-    "--max_length=100",
-    "--save_total_limit=1",
-    "--load_best_model_at_end=True",
-    "--fp16=True",
-    "--fp16_opt_level=O1",
-    ]
-    ################
-    # Config parsing
-    ################
-parser = TrlParser((SFTScriptArguments, SFTConfig, ModelConfig))
-args, training_args, model_config = parser.parse_args_and_config()
-reward_config.gradient_checkpointing_kwargs = dict(use_reentrant=False)
-
-model_kwargs = dict(
-        revision=model_config.model_revision,
-        trust_remote_code=model_config.trust_remote_code,
-        device_map=get_kbit_device_map() if quantization_config is not None else None,
-    )
-
-
 trainer = SFTTrainer(
     model,
     train_dataset=dataset,
-    args=training_args,
+    args=SFTConfig(output_dir="/tmp",
+                   per_device_train_batch_size=16,
+                   num_train_epochs=2
+                   ),
     formatting_func=formatting_prompts_func,
     data_collator=collator,
     peft_config=peft_config
 )
+write_token="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"
 start = time.time()
 print("Training...")
 try:
@@ -114,5 +83,5 @@ except Exception as e:
 print("Completed!")
 print("Time taken for sft training:", time.time() - start)
 print("Pushing to hub...")
-trainer.model.push_to_hub("srushtisingh/EthicalSFT")
+trainer.model.push_to_hub("srushtisingh/EthicalSFT", token=write_token)
 # trainer.train()
