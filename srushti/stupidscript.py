@@ -2,6 +2,20 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from datasets import load_dataset
 from trl import SFTConfig, SFTTrainer, DataCollatorForCompletionOnlyLM
 import torch
+import time
+import json
+import random
+from sklearn.model_selection import train_test_split
+from peft import (
+    LoraConfig,
+    TaskType,
+)
+import os
+import time
+from peft import get_peft_model
+from trl import ModelConfig, SFTTrainer
+from trl import SFTConfig
+import transformers
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
