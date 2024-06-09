@@ -72,7 +72,7 @@ trainer = SFTTrainer(
     data_collator=collator,
     peft_config=peft_config
 )
-write_token = "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"
+write_token = "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"
 start = time.time()
 print("Training...")
 try:
