@@ -1,0 +1,29 @@
+In this project we aimed at incorporating an ethical framework to the large language model (LLM) in replace of the traditional rule-based system regulating the LLM's outputs. We envisioned to integrate 3 ethical perspectives (action itself, motivation behind the action, consequences of the action towards prompting the agent to a more ethical character) to the LLM. To accomplish the goal,
+we have curated our custom datasets depicting preferences on different ethical values and further trained 3 reward models representing such preferences to replace human annotators in the process of reinforcement learning from human feedbacks (RLHF). After the reward models training, we utilized PPO training to integrate the behaviors of the 3 reward models to finally fine-tune the base model.
+
+\section{Constraints}
+Up until the report is finished (7th, June, 2024), we only fine-tuned the base model, instead of the supposed supervised fine-tuned model, due to the continuously delayed SFT training.
+
+
+Furthermore, due to limited time constraints, we were only able to generate the datasets for reward model training with max token length of 32, resulting in a lot of incomplete conversations. 
+
+For the same reason, we had to quantize the base model to 4 bits and implement LoRA to the reward model training, which lead to decreased model performance. 
+
+\section{Non-Increased Performance after Fine-tuning}
+We have observed stable reward as shown during the PPO training. Also, from our quantitative and qualitative analysis done in the previous section, we observe that the fine-tuning pipeline is not taking significant effects.
+
+We conclude the observation may come from the following reasons:
+\begin{itemize}
+    \item No supervised fine-tuning happened in our pipeline;
+    \item Max token length of the reward model training dataset generation is limited, resulting in insufficient data.
+\end{itemize}
+
+
+\section{Future Improvements and further work}
+We hope we will be able to integrate the SFT model into our complete fine-tuning pipeline in due course and compare relevant evaluation results.
+
+As we have tested during the data curation, adjusting max token length to 90 can largely resolve this problem, however also leading to significantly increased computing time and GPU memory usage. We look to curate a more complete dataset once time and resources constraints are lifted.
+
+We also look to train the whole model in the future given sufficient time and computing resources.
+
+For the observed non-significant training result, we aim to discover the reasons behind it. For now, our initial research direction is the model's degradation of the ability to coherently answer questions in general.
