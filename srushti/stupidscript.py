@@ -40,12 +40,6 @@ peft_config = LoraConfig(
     bias="none",
     task_type="CAUSAL_LM",
 )
-train_data = dataset_train.select(
-    [i for i in range(len(dataset["train"])) if i % 10 != 0])  # Use 90% of the data for training
-val_data = dataset_train.select(
-    [i for i in range(len(dataset["train"])) if i % 10 == 0])  # Use 10% of the data for validation
-print(len(train_data))
-print(len(val_data))
 
 
 def formatting_prompts_func(example):
@@ -61,7 +55,7 @@ collator = DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenize
 
 trainer = SFTTrainer(
     model,
-    train_dataset=train_data,
+    train_dataset=dataset,
     args=SFTConfig(output_dir="/tmp"),
     formatting_func=formatting_prompts_func,
     data_collator=collator,
