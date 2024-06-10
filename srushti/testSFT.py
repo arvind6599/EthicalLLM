@@ -3,7 +3,7 @@ import torch
 from transformers import pipeline
 
 # Load the fine-tuned model and tokenizer from the Hugging Face Hub
-model_name = "srushtisingh/EthicalSFT"  # replace with your model name
+model_name = "srushtisingh/dummySFT"  # replace with your model name
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name)
 
@@ -20,7 +20,7 @@ test_prompts = [
 
 
 # Function to generate responses
-def generate_response(prompt, model, tokenizer, max_length=50, num_return_sequences=1):
+def generate_response(prompt, model, tokenizer, max_length=250, num_return_sequences=1):
     inputs = tokenizer(prompt, return_tensors="pt").to(device)
     outputs = model.generate(
         inputs.input_ids,
