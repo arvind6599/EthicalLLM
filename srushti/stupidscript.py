@@ -20,7 +20,7 @@ import transformers
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
 access_token = "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"
-dataset = load_dataset("srushtisingh/Ethical_redteam", split="train")
+dataset = load_dataset("srushtisingh/EthicalLLM_10k", split="train")
 
 quantization_config = BitsAndBytesConfig(
     load_in_4bit=True,
@@ -28,10 +28,10 @@ quantization_config = BitsAndBytesConfig(
     bnb_4bit_compute_dtype=torch.float16,
 )
 
-model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token,
+model = AutoModelForCausalLM.from_pretrained("srushtisingh/EthicalSFTModel", token=access_token,
                                             # quantization_config=quantization_config,
                                              device_map=device_map)
-tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", token=access_token)
+tokenizer = AutoTokenizer.from_pretrained("srushtisingh/EthicalSFTModel", token=access_token)
 if tokenizer.pad_token is None:
     tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
     model.resize_token_embeddings(len(tokenizer))
