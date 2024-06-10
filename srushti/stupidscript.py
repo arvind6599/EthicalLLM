@@ -1,5 +1,5 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, AutoConfig
-from datasets import load_dataset
+from datasets import load_dataset, concatenate_datasets
 from trl import SFTConfig, SFTTrainer, DataCollatorForCompletionOnlyLM
 import torch
 import time
@@ -22,7 +22,7 @@ device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
 access_token = "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"
 dataset1 = load_dataset("srushtisingh/Ethical_redteam", split="train")
 dataset = load_dataset("srushtisingh/EthicalLLM_10k", split="train")
-dataset = dataset1.concatenate(dataset)
+dataset = concatenate_datasets([dataset, dataset1])
 
 quantization_config = BitsAndBytesConfig(
     load_in_4bit=True,
