@@ -65,7 +65,7 @@ trainer = SFTTrainer(
     model,
     train_dataset=dataset,
     args=SFTConfig(output_dir="/tmp",
-                   per_device_train_batch_size=4,
+                   per_device_train_batch_size=1,
                    num_train_epochs=5,
                    max_seq_length=150
                    ),
