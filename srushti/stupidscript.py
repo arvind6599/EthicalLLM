@@ -19,7 +19,7 @@ import transformers
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # the device to load the model onto
 device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
-access_token = "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"
+access_token = "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"
 dataset1 = load_dataset("srushtisingh/Ethical_redteam", split="train")
 dataset = load_dataset("srushtisingh/EthicalLLM_10k", split="train")
 dataset = concatenate_datasets([dataset, dataset1])
