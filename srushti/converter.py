@@ -3,11 +3,11 @@ import torch
 from transformers import AutoTokenizer
 
 write_token = "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"
-access_token = "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"
+access_token = "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"
 
 def merge_and_upload(tokenizer=None):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model_id = 'srushtisingh/EthicalSFTModel'
+    model_id = 'srushtisingh/dummySFT'
     peft_model = AutoPeftModelForCausalLM.from_pretrained(model_id)
     merged_model = peft_model.merge_and_unload()
     merged_model.to(device)
